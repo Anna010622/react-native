@@ -18,10 +18,8 @@ export const Button = ({ onPressFunction, text }) => {
 
 const styles = StyleSheet.create({
 	btn: {
-		paddingLeft: 32,
-		paddingRight: 32,
-		paddingTop: 16,
-		paddingBottom: 16,
+		paddingHorizontal: 32,
+		paddingVertical: 16,
 		borderRadius: 100,
 	},
 	btnText: {

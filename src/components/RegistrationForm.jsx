@@ -1,9 +1,14 @@
 import { StyleSheet, Text, View, TextInput, Pressable } from 'react-native';
 import { Button } from './Button';
 import { useState } from 'react';
+import { AntDesign } from '@expo/vector-icons';
 
 export const RegistrationForm = ({ navigation }) => {
 	const [secureTextEntry, setSecureTextEntry] = useState(true);
+	const [isPasswordFocus, setIsPasswordFocus] = useState(false);
+	const [isEmailFocus, setIsEmailFocus] = useState(false);
+	const [isLoginFocus, setIsLoginFocus] = useState(false);
+
 	const onPressFunction = () => {
 		console.log('click');
 	};
@@ -15,38 +20,56 @@ export const RegistrationForm = ({ navigation }) => {
 		<View style={styles.form}>
 			<View style={styles.imgBox}>
 				<Pressable onPress={onPressFunction} style={styles.addBtnWrapper}>
-					<Text style={styles.addBtn}>+</Text>
+					<AntDesign name="plus" size={18} color="#FF6C00" />
+					{/* <AntDesign
+						name="plus"
+						size={18}
+						color="#E8E8E8"
+						style={styles.icon}
+					/> */}
+					{/* <AntDesign name="close" size={18} color="#E8E8E8" /> */}
 				</Pressable>
 			</View>
 			<Text style={styles.header}>Реєстрація</Text>
-			<View style={{ marginBottom: 16 }}>
+			<View style={styles.inputWrapper}>
 				<TextInput
-					style={styles.input}
 					placeholder="Логін"
 					placeholderTextColor="#BDBDBD"
+					onFocus={() => setIsLoginFocus(true)}
+					onBlur={() => setIsLoginFocus(false)}
+					style={[
+						styles.input,
+						isLoginFocus ? styles.inputFocus : styles.inputBlur,
+					]}
 				/>
 			</View>
 
-			<View style={{ marginBottom: 16 }}>
+			<View style={styles.inputWrapper}>
 				<TextInput
-					style={styles.input}
 					placeholder="Адреса електронної пошти"
 					placeholderTextColor="#BDBDBD"
+					onFocus={() => setIsEmailFocus(true)}
+					onBlur={() => setIsEmailFocus(false)}
+					style={[
+						styles.input,
+						isEmailFocus ? styles.inputFocus : styles.inputBlur,
+					]}
 				/>
 			</View>
-			<View style={{ justifyContent: 'center', marginBottom: 16 }}>
+			<View style={styles.inputWrapper}>
 				<TextInput
-					style={styles.input}
 					placeholder="Пароль"
 					secureTextEntry={secureTextEntry}
 					placeholderTextColor="#BDBDBD"
+					onFocus={() => setIsPasswordFocus(true)}
+					onBlur={() => setIsPasswordFocus(false)}
+					style={[
+						styles.input,
+						isPasswordFocus ? styles.inputFocus : styles.inputBlur,
+					]}
 				/>
 				<Text
-					style={{
-						...styles.link,
-						position: 'absolute',
-						right: 16,
-					}}
+					style={styles.inputButton}
 					onPress={() => setSecureTextEntry(!secureTextEntry)}
 				>
 					{secureTextEntry ? 'Показати' : 'Cховати'}
@@ -59,14 +82,7 @@ export const RegistrationForm = ({ navigation }) => {
 				marginBottom={50}
 			/>
 
-			<Text
-				style={{
-					...styles.link,
-					marginBottom: 66,
-					marginTop: 16,
-				}}
-				onPress={() => navigation.navigate('Login')}
-			>
+			<Text style={styles.link} onPress={() => navigation.navigate('Login')}>
 				Вже є акаунт? Увійти
 			</Text>
 		</View>
@@ -76,8 +92,7 @@ export const RegistrationForm = ({ navigation }) => {
 const styles = StyleSheet.create({
 	form: {
 		backgroundColor: '#FFFFFF',
-		paddingLeft: 16,
-		paddingRight: 16,
+		paddingHorizontal: 16,
 		paddingTop: 92,
 		borderTopRightRadius: 25,
 		borderTopLeftRadius: 25,
@@ -91,20 +106,21 @@ const styles = StyleSheet.create({
 		alignSelf: 'center',
 		backgroundColor: '#F6F6F6',
 	},
+	icon: {
+		transform: 'rotate(-45deg)',
+	},
 	addBtnWrapper: {
 		position: 'absolute',
 		right: -12,
 		top: 84,
-		width: 24,
-		height: 24,
+		width: 25,
+		height: 25,
 		borderWidth: 1,
 		borderColor: '#FF6C00',
 		borderRadius: 50,
-		backgroundColor: 'transparent',
-	},
-	addBtn: {
-		color: '#FF6C00',
-		textAlign: 'center',
+		justifyContent: 'center',
+		alignItems: 'center',
+		backgroundColor: '#FFFFFF',
 	},
 	header: {
 		marginBottom: 33,
@@ -114,6 +130,10 @@ const styles = StyleSheet.create({
 		color: '#212121',
 		fontSize: 30,
 		letterSpacing: 0.3,
+	},
+	inputWrapper: {
+		marginBottom: 16,
+		justifyContent: 'center',
 	},
 	input: {
 		padding: 16,
@@ -125,9 +145,25 @@ const styles = StyleSheet.create({
 		color: '#212121',
 		fontFamily: 'Roboto-Regular',
 	},
+	inputFocus: {
+		backgroundColor: '#FFFFFF',
+		borderColor: '#FF6C00',
+	},
+	inputBlur: {
+		backgroundColor: '#F6F6F6',
+	},
+	inputButton: {
+		textAlign: 'center',
+		fontFamily: 'Roboto-Regular',
+		color: '#1B4371',
+		position: 'absolute',
+		right: 16,
+	},
 	link: {
 		textAlign: 'center',
 		fontFamily: 'Roboto-Regular',
 		color: '#1B4371',
+		marginBottom: 66,
+		marginTop: 16,
 	},
 });
