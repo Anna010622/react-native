@@ -1,20 +1,34 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import * as React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import RegistrationScreen from './src/screens/RegistrationScreen';
+import LoginScreen from './src/screens/LoginScreen';
+import PostScreen from './src/screens/PostsScreen';
+import { useFonts } from 'expo-font';
+
+const Stack = createNativeStackNavigator();
 
 export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
-}
+	const [fontsLoaded] = useFonts({
+		'Roboto-Regular': require('./src/assets/fonts/Roboto-Regular.ttf'),
+		'Roboto-Medium': require('./src/assets/fonts/Roboto-Medium.ttf'),
+		'Roboto-Bold': require('./src/assets/fonts/Roboto-Bold.ttf'),
+	});
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+	if (!fontsLoaded) {
+		return null;
+	}
+
+	return (
+		<NavigationContainer>
+			<Stack.Navigator
+				screenOptions={{ headerShown: false }}
+				initialRouteName="Login"
+			>
+				<Stack.Screen name="Registration" component={RegistrationScreen} />
+				<Stack.Screen name="Login" component={LoginScreen} />
+				<Stack.Screen name="Post" component={PostScreen} />
+			</Stack.Navigator>
+		</NavigationContainer>
+	);
+}
