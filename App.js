@@ -5,6 +5,7 @@ import RegistrationScreen from './src/screens/RegistrationScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import PostScreen from './src/screens/PostsScreen';
 import { useFonts } from 'expo-font';
+import { Keyboard, TouchableWithoutFeedback, View } from 'react-native';
 
 const Stack = createNativeStackNavigator();
 
@@ -20,15 +21,19 @@ export default function App() {
 	}
 
 	return (
-		<NavigationContainer>
-			<Stack.Navigator
-				screenOptions={{ headerShown: false }}
-				initialRouteName="Login"
-			>
-				<Stack.Screen name="Registration" component={RegistrationScreen} />
-				<Stack.Screen name="Login" component={LoginScreen} />
-				<Stack.Screen name="Post" component={PostScreen} />
-			</Stack.Navigator>
-		</NavigationContainer>
+		<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+			<View style={{ flex: 1 }}>
+				<NavigationContainer>
+					<Stack.Navigator
+						screenOptions={{ headerShown: false }}
+						initialRouteName="Login"
+					>
+						<Stack.Screen name="Registration" component={RegistrationScreen} />
+						<Stack.Screen name="Login" component={LoginScreen} />
+						<Stack.Screen name="Post" component={PostScreen} />
+					</Stack.Navigator>
+				</NavigationContainer>
+			</View>
+		</TouchableWithoutFeedback>
 	);
 }

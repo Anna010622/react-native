@@ -1,91 +1,169 @@
-import { StyleSheet, Text, View, TextInput, Pressable } from 'react-native';
+import {
+	StyleSheet,
+	Text,
+	View,
+	TextInput,
+	Pressable,
+	KeyboardAvoidingView,
+	Keyboard,
+} from 'react-native';
 import { Button } from './Button';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AntDesign } from '@expo/vector-icons';
+import { Formik } from 'formik';
+import * as yup from 'yup';
+
+const schema = yup
+	.object({
+		login: yup
+			.string()
+			.min(3, 'Логін має бути не менше ніж 3 символів')
+			.required('Заповніть це поле'),
+		email: yup
+			.string()
+			.email('Eлектронна адреса має бути дійсною')
+			.required('Заповніть це поле'),
+		password: yup
+			.string()
+			.min(5, 'Пароль має бути не менше ніж 5 символів')
+			.max(10, 'Пароль має бути не більше ніж 10 символів')
+			.required('Заповніть це поле'),
+	})
+	.required();
 
 export const RegistrationForm = ({ navigation }) => {
 	const [secureTextEntry, setSecureTextEntry] = useState(true);
 	const [isPasswordFocus, setIsPasswordFocus] = useState(false);
 	const [isEmailFocus, setIsEmailFocus] = useState(false);
 	const [isLoginFocus, setIsLoginFocus] = useState(false);
+	const [isShowKeyboard, setIsShowKeyboard] = useState(false);
 
-	const onPressFunction = () => {
-		console.log('click');
+	useEffect(() => {
+		const removeMargin = Keyboard.addListener('keyboardDidHide', () => {
+			setIsShowKeyboard(false);
+		});
+		return () => {
+			removeMargin.remove();
+		};
+	}, []);
+
+	const handleAddImg = () => {
+		console.log('add img');
 	};
-	const handlePressOnBtnRegistration = () => {
-		console.log('Зареєструватися');
+
+	const onSubmit = values => {
+		console.log(values);
 	};
 
 	return (
-		<View style={styles.form}>
-			<View style={styles.imgBox}>
-				<Pressable onPress={onPressFunction} style={styles.addBtnWrapper}>
-					<AntDesign name="plus" size={18} color="#FF6C00" />
-					{/* <AntDesign
-						name="plus"
-						size={18}
-						color="#E8E8E8"
-						style={styles.icon}
-					/> */}
-					{/* <AntDesign name="close" size={18} color="#E8E8E8" /> */}
-				</Pressable>
-			</View>
-			<Text style={styles.header}>Реєстрація</Text>
-			<View style={styles.inputWrapper}>
-				<TextInput
-					placeholder="Логін"
-					placeholderTextColor="#BDBDBD"
-					onFocus={() => setIsLoginFocus(true)}
-					onBlur={() => setIsLoginFocus(false)}
-					style={[
-						styles.input,
-						isLoginFocus ? styles.inputFocus : styles.inputBlur,
-					]}
-				/>
-			</View>
+		<Formik
+			initialValues={{ login: '', email: '', password: '' }}
+			onSubmit={onSubmit}
+			validationSchema={schema}
+		>
+			{({
+				handleChange,
+				handleSubmit,
+				handleBlur,
+				values,
+				errors,
+				touched,
+			}) => (
+				<View style={styles.form}>
+					<View style={styles.imgBox}>
+						<Pressable onPress={handleAddImg} style={styles.addBtnWrapper}>
+							<AntDesign name="plus" size={18} color="#FF6C00" />
+						</Pressable>
+					</View>
+					<Text style={styles.header}>Реєстрація</Text>
 
-			<View style={styles.inputWrapper}>
-				<TextInput
-					placeholder="Адреса електронної пошти"
-					placeholderTextColor="#BDBDBD"
-					onFocus={() => setIsEmailFocus(true)}
-					onBlur={() => setIsEmailFocus(false)}
-					style={[
-						styles.input,
-						isEmailFocus ? styles.inputFocus : styles.inputBlur,
-					]}
-				/>
-			</View>
-			<View style={styles.inputWrapper}>
-				<TextInput
-					placeholder="Пароль"
-					secureTextEntry={secureTextEntry}
-					placeholderTextColor="#BDBDBD"
-					onFocus={() => setIsPasswordFocus(true)}
-					onBlur={() => setIsPasswordFocus(false)}
-					style={[
-						styles.input,
-						isPasswordFocus ? styles.inputFocus : styles.inputBlur,
-					]}
-				/>
-				<Text
-					style={styles.inputButton}
-					onPress={() => setSecureTextEntry(!secureTextEntry)}
-				>
-					{secureTextEntry ? 'Показати' : 'Cховати'}
-				</Text>
-			</View>
+					<View style={{ marginBottom: isShowKeyboard ? 110 : 0 }}>
+						<View style={styles.inputWrapper}>
+							<TextInput
+								placeholder="Логін"
+								placeholderTextColor="#BDBDBD"
+								onFocus={() => {
+									setIsLoginFocus(true);
+									setIsShowKeyboard(true);
+								}}
+								onBlur={() => {
+									setIsLoginFocus(false);
+								}}
+								onChangeText={handleChange('login')}
+								value={values.login}
+								style={[
+									styles.input,
+									isLoginFocus ? styles.inputFocus : styles.inputBlur,
+								]}
+							/>
+							{errors.login && touched.login && (
+								<Text style={styles.errorMessage}>{errors.login}</Text>
+							)}
+						</View>
+						<View style={styles.inputWrapper}>
+							<TextInput
+								placeholder="Адреса електронної пошти"
+								placeholderTextColor="#BDBDBD"
+								onFocus={() => {
+									setIsEmailFocus(true);
+									setIsShowKeyboard(true);
+								}}
+								onBlur={() => {
+									setIsEmailFocus(false);
+								}}
+								onChangeText={handleChange('email')}
+								value={values.email}
+								style={[
+									styles.input,
+									isEmailFocus ? styles.inputFocus : styles.inputBlur,
+								]}
+							/>
+							{errors.email && touched.email && (
+								<Text style={styles.errorMessage}>{errors.email}</Text>
+							)}
+						</View>
+						<View style={styles.inputWrapper}>
+							<TextInput
+								placeholder="Пароль"
+								secureTextEntry={secureTextEntry}
+								placeholderTextColor="#BDBDBD"
+								onFocus={() => {
+									setIsPasswordFocus(true);
+									setIsShowKeyboard(true);
+								}}
+								onBlur={() => {
+									setIsPasswordFocus(false);
+								}}
+								onChangeText={handleChange('password')}
+								value={values.password}
+								style={[
+									styles.input,
+									isPasswordFocus ? styles.inputFocus : styles.inputBlur,
+								]}
+							/>
+							<Text
+								style={styles.inputButton}
+								onPress={() => setSecureTextEntry(!secureTextEntry)}
+							>
+								{secureTextEntry ? 'Показати' : 'Cховати'}
+							</Text>
+						</View>
+						{errors.password && touched.password && (
+							<Text style={styles.errorMessage}>{errors.password}</Text>
+						)}
+					</View>
 
-			<Button
-				text="Зареєструватися"
-				onPressFunction={handlePressOnBtnRegistration}
-				marginBottom={50}
-			/>
+					<Button text="Зареєструватися" onPressFunction={handleSubmit} />
 
-			<Text style={styles.link} onPress={() => navigation.navigate('Login')}>
-				Вже є акаунт? Увійти
-			</Text>
-		</View>
+					<Text
+						style={styles.link}
+						onPress={() => navigation.navigate('Login')}
+					>
+						Вже є акаунт? Увійти
+					</Text>
+				</View>
+			)}
+		</Formik>
 	);
 };
 
@@ -105,9 +183,6 @@ const styles = StyleSheet.create({
 		borderRadius: 16,
 		alignSelf: 'center',
 		backgroundColor: '#F6F6F6',
-	},
-	icon: {
-		transform: 'rotate(-45deg)',
 	},
 	addBtnWrapper: {
 		position: 'absolute',
@@ -165,5 +240,10 @@ const styles = StyleSheet.create({
 		color: '#1B4371',
 		marginBottom: 66,
 		marginTop: 16,
+	},
+	errorMessage: {
+		color: 'red',
+		paddingHorizontal: 16,
+		paddingTop: 4,
 	},
 });

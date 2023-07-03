@@ -1,4 +1,4 @@
-import { ImageBackground, StyleSheet, View } from 'react-native';
+import { ImageBackground, SafeAreaView, StyleSheet, View } from 'react-native';
 export const ContainerBG = ({ children }) => {
 	return (
 		<View style={styles.container}>
@@ -7,7 +7,9 @@ export const ContainerBG = ({ children }) => {
 				resizeMode="cover"
 				style={styles.backgroundImg}
 			>
-				{children}
+				<SafeAreaView style={styles.container}>
+					<View style={styles.inner}>{children}</View>
+				</SafeAreaView>
 			</ImageBackground>
 		</View>
 	);
@@ -17,8 +19,11 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 	},
-	backgroundImg: {
+	inner: {
 		flex: 1,
 		justifyContent: 'flex-end',
+	},
+	backgroundImg: {
+		flex: 1,
 	},
 });
