@@ -4,7 +4,6 @@ import {
 	View,
 	TextInput,
 	Pressable,
-	KeyboardAvoidingView,
 	Keyboard,
 } from 'react-native';
 import { Button } from './Button';
@@ -61,14 +60,7 @@ export const RegistrationForm = ({ navigation }) => {
 			onSubmit={onSubmit}
 			validationSchema={schema}
 		>
-			{({
-				handleChange,
-				handleSubmit,
-				handleBlur,
-				values,
-				errors,
-				touched,
-			}) => (
+			{({ handleChange, handleSubmit, values, errors, touched }) => (
 				<View style={styles.form}>
 					<View style={styles.imgBox}>
 						<Pressable onPress={handleAddImg} style={styles.addBtnWrapper}>

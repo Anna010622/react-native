@@ -6,10 +6,6 @@ import * as yup from 'yup';
 
 const schema = yup
 	.object({
-		login: yup
-			.string()
-			.min(3, 'Логін має бути не менше ніж 3 символів')
-			.required('Заповніть це поле'),
 		email: yup
 			.string()
 			.email('Eлектронна адреса має бути дійсною')
@@ -43,7 +39,7 @@ export const LoginForm = ({ navigation }) => {
 
 	return (
 		<Formik
-			initialValues={{ login: '', email: '', password: '' }}
+			initialValues={{ email: '', password: '' }}
 			onSubmit={onSubmit}
 			validationSchema={schema}
 		>
