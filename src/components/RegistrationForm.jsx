@@ -69,7 +69,7 @@ export const RegistrationForm = ({ navigation }) => {
 					</View>
 					<Text style={styles.header}>Реєстрація</Text>
 
-					<View style={{ marginBottom: isShowKeyboard ? 110 : 0 }}>
+					<View style={isShowKeyboard && styles.inputContainer}>
 						<View style={styles.inputWrapper}>
 							<TextInput
 								placeholder="Логін"
@@ -197,6 +197,9 @@ const styles = StyleSheet.create({
 		color: '#212121',
 		fontSize: 30,
 		letterSpacing: 0.3,
+	},
+	inputContainer: {
+		paddingBottom: 30,
 	},
 	inputWrapper: {
 		marginBottom: 16,

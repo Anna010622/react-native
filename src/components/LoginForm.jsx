@@ -1,4 +1,11 @@
-import { StyleSheet, Text, View, TextInput, Keyboard } from 'react-native';
+import {
+	StyleSheet,
+	Text,
+	View,
+	TextInput,
+	Keyboard,
+	KeyboardAvoidingView,
+} from 'react-native';
 import { Button } from './Button';
 import { useEffect, useState } from 'react';
 import { Formik } from 'formik';
@@ -43,18 +50,11 @@ export const LoginForm = ({ navigation }) => {
 			onSubmit={onSubmit}
 			validationSchema={schema}
 		>
-			{({
-				handleChange,
-				handleSubmit,
-				handleBlur,
-				values,
-				errors,
-				touched,
-			}) => (
+			{({ handleChange, handleSubmit, values, errors, touched }) => (
 				<View style={styles.form}>
 					<Text style={styles.header}>Увійти</Text>
 
-					<View style={{ marginBottom: isShowKeyboard ? 110 : 0 }}>
+					<View style={isShowKeyboard && styles.inputContainer}>
 						<View style={styles.inputWrapper}>
 							<TextInput
 								placeholder="Адреса електронної пошти"
@@ -139,6 +139,9 @@ const styles = StyleSheet.create({
 		color: '#212121',
 		fontSize: 30,
 		letterSpacing: 0.3,
+	},
+	inputContainer: {
+		paddingBottom: 30,
 	},
 	inputWrapper: {
 		marginBottom: 16,
