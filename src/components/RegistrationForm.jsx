@@ -38,11 +38,15 @@ export const RegistrationForm = ({ navigation }) => {
 	const [isShowKeyboard, setIsShowKeyboard] = useState(false);
 
 	useEffect(() => {
-		const removeMargin = Keyboard.addListener('keyboardDidHide', () => {
+		const addPadding = Keyboard.addListener('keyboardDidShow', () => {
+			setIsShowKeyboard(true);
+		});
+		const removePadding = Keyboard.addListener('keyboardDidHide', () => {
 			setIsShowKeyboard(false);
 		});
 		return () => {
-			removeMargin.remove();
+			addPadding.remove();
+			removePadding.remove();
 		};
 	}, []);
 
@@ -74,13 +78,8 @@ export const RegistrationForm = ({ navigation }) => {
 							<TextInput
 								placeholder="Логін"
 								placeholderTextColor="#BDBDBD"
-								onFocus={() => {
-									setIsLoginFocus(true);
-									setIsShowKeyboard(true);
-								}}
-								onBlur={() => {
-									setIsLoginFocus(false);
-								}}
+								onFocus={() => setIsLoginFocus(true)}
+								onBlur={() => setIsLoginFocus(false)}
 								onChangeText={handleChange('login')}
 								value={values.login}
 								style={[
@@ -96,13 +95,8 @@ export const RegistrationForm = ({ navigation }) => {
 							<TextInput
 								placeholder="Адреса електронної пошти"
 								placeholderTextColor="#BDBDBD"
-								onFocus={() => {
-									setIsEmailFocus(true);
-									setIsShowKeyboard(true);
-								}}
-								onBlur={() => {
-									setIsEmailFocus(false);
-								}}
+								onFocus={() => setIsEmailFocus(true)}
+								onBlur={() => setIsEmailFocus(false)}
 								onChangeText={handleChange('email')}
 								value={values.email}
 								style={[
@@ -119,13 +113,8 @@ export const RegistrationForm = ({ navigation }) => {
 								placeholder="Пароль"
 								secureTextEntry={secureTextEntry}
 								placeholderTextColor="#BDBDBD"
-								onFocus={() => {
-									setIsPasswordFocus(true);
-									setIsShowKeyboard(true);
-								}}
-								onBlur={() => {
-									setIsPasswordFocus(false);
-								}}
+								onFocus={() => setIsPasswordFocus(true)}
+								onBlur={() => setIsPasswordFocus(false)}
 								onChangeText={handleChange('password')}
 								value={values.password}
 								style={[
