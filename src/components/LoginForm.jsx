@@ -39,6 +39,7 @@ export const LoginForm = ({ navigation }) => {
 
 	const onSubmit = values => {
 		console.log(values);
+		navigation.navigate('Home');
 	};
 
 	return (

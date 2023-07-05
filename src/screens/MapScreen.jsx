@@ -1,11 +1,11 @@
 import { Text, View } from 'react-native';
 
-const PostScreen = () => {
+const MapScreen = () => {
 	return (
 		<View>
-			<Text>PostScreen</Text>
+			<Text>MapScreen</Text>
 		</View>
 	);
 };
 
-export default PostScreen;
+export default MapScreen;
