@@ -14,6 +14,19 @@ const Home = () => {
 	return (
 		<Tabs.Navigator
 			screenOptions={({ route }) => ({
+				tabBarStyle: {
+					height: 58,
+					paddingHorizontal: 81,
+				},
+				tabBarItemStyle: {
+					alignSelf: 'center',
+					borderRadius: 50,
+					width: 70,
+					height: 40,
+				},
+				tabBarActiveBackgroundColor: '#FF6C00',
+				tabBarInactiveTintColor: '#BDBDBD',
+				tabBarActiveTintColor: '#FFFFFF',
 				tabBarShowLabel: false,
 				headerShown: route.name === 'ProfileScreen' ? false : true,
 				headerTitleAlign: 'center',
@@ -22,17 +35,13 @@ const Home = () => {
 					if (route.name === 'PostsScreen') {
 						iconName = 'grid';
 					} else if (route.name === 'CreatePostsScreen') {
-						iconName = focused ? 'plus' : 'plus';
+						iconName = 'plus';
 					} else if (route.name === 'ProfileScreen') {
 						iconName = 'user';
 					}
 					return <Feather name={iconName} size={size} color={color} />;
 				},
 			})}
-			tabBarOptions={{
-				activeTintColor: '#FF6C00',
-				inactiveTintColor: 'rgba(33, 33, 33, 0.8)',
-			}}
 		>
 			<Tabs.Screen
 				name="PostsScreen"
@@ -49,13 +58,11 @@ const Home = () => {
 			<Tabs.Screen
 				name="CreatePostsScreen"
 				component={CreatePostsScreen}
-				options={{ title: 'Створити публікацію' }}
+				options={{
+					title: 'Створити публікацію',
+				}}
 			/>
-			<Tabs.Screen
-				name="ProfileScreen"
-				component={ProfileScreen}
-				options={{ title: '' }}
-			/>
+			<Tabs.Screen name="ProfileScreen" component={ProfileScreen} />
 		</Tabs.Navigator>
 	);
 };
