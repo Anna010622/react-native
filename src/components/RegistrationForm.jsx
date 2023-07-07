@@ -54,14 +54,16 @@ export const RegistrationForm = ({ navigation }) => {
 		console.log('add img');
 	};
 
-	const onSubmit = values => {
+	const initialValues = { login: '', email: '', password: '' };
+	const onSubmit = (values, { resetForm }) => {
 		console.log(values);
-		navigation.navigate('Home');
+		navigation.navigate('BottomTabNavigator');
+		resetForm({ values: initialValues });
 	};
 
 	return (
 		<Formik
-			initialValues={{ login: '', email: '', password: '' }}
+			initialValues={initialValues}
 			onSubmit={onSubmit}
 			validationSchema={schema}
 		>
@@ -145,10 +147,10 @@ export const RegistrationForm = ({ navigation }) => {
 							>
 								{secureTextEntry ? 'Показати' : 'Cховати'}
 							</Text>
+							{errors.password && touched.password && (
+								<Text style={styles.errorMessage}>{errors.password}</Text>
+							)}
 						</View>
-						{errors.password && touched.password && (
-							<Text style={styles.errorMessage}>{errors.password}</Text>
-						)}
 					</View>
 
 					<Button text="Зареєструватися" onPressFunction={handleSubmit} />
@@ -209,7 +211,6 @@ const styles = StyleSheet.create({
 	},
 	inputWrapper: {
 		marginBottom: 16,
-		justifyContent: 'center',
 	},
 	input: {
 		padding: 16,
@@ -234,6 +235,7 @@ const styles = StyleSheet.create({
 		color: '#1B4371',
 		position: 'absolute',
 		right: 16,
+		top: 16,
 	},
 	link: {
 		textAlign: 'center',

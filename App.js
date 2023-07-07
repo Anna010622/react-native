@@ -1,14 +1,8 @@
 import * as React from 'react';
 import 'react-native-gesture-handler';
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import RegistrationScreen from './src/screens/RegistrationScreen';
-import LoginScreen from './src/screens/LoginScreen';
 import { useFonts } from 'expo-font';
 import { Keyboard, TouchableWithoutFeedback, View } from 'react-native';
-import Home from './src/screens/Home';
-
-const MainStack = createStackNavigator();
+import MainNavigation from './src/navigation/MainNavigator';
 
 export default function App() {
 	const [fontsLoaded] = useFonts({
@@ -24,19 +18,7 @@ export default function App() {
 	return (
 		<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
 			<View style={{ flex: 1 }}>
-				<NavigationContainer>
-					<MainStack.Navigator
-						screenOptions={{ headerShown: false }}
-						initialRouteName="Login"
-					>
-						<MainStack.Screen
-							name="Registration"
-							component={RegistrationScreen}
-						/>
-						<MainStack.Screen name="Login" component={LoginScreen} />
-						<MainStack.Screen name="Home" component={Home} />
-					</MainStack.Navigator>
-				</NavigationContainer>
+				<MainNavigation />
 			</View>
 		</TouchableWithoutFeedback>
 	);

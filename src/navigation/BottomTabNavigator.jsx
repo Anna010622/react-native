@@ -1,18 +1,22 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Pressable, StyleSheet } from 'react-native';
-import PostsScreen from './PostsScreen';
-import CreatePostsScreen from './CreatePostsScreen';
-import ProfileScreen from './ProfileScreen';
+import PostsScreen from '../screens/PostsScreen';
+import CreatePostsScreen from '../screens/CreatePostsScreen';
+import ProfileScreen from '../screens/ProfileScreen';
 import { Feather } from '@expo/vector-icons';
 
 const Tabs = createBottomTabNavigator();
 
-const Home = ({ navigation }) => {
+const BottomTabNavigator = ({ navigation }) => {
 	return (
 		<Tabs.Navigator
 			initialRouteName="PostsScreen"
 			screenOptions={({ route }) => ({
 				tabBarStyle: styles.tabBarStyle,
+				tabBarItemStyle: styles.tabBarItemStyle,
+				tabBarActiveBackgroundColor: '#FF6C00',
+				tabBarInactiveTintColor: '#BDBDBD',
+				tabBarActiveTintColor: '#FFFFFF',
 				tabBarShowLabel: false,
 				headerShown: route.name === 'ProfileScreen' ? false : true,
 				headerTitleAlign: 'center',
@@ -21,13 +25,10 @@ const Home = ({ navigation }) => {
 					let iconName;
 					if (route.name === 'PostsScreen') {
 						iconName = 'grid';
-						color = '#BDBDBD';
 					} else if (route.name === 'CreatePostsScreen') {
 						iconName = 'plus';
-						color = '#FFFFFF';
 					} else if (route.name === 'ProfileScreen') {
 						iconName = 'user';
-						color = '#BDBDBD';
 					}
 					return <Feather name={iconName} size={size} color={color} />;
 				},
@@ -53,7 +54,6 @@ const Home = ({ navigation }) => {
 				component={CreatePostsScreen}
 				options={{
 					title: 'Створити публікацію',
-					tabBarItemStyle: styles.tabBarItemStyle,
 					tabBarStyle: { display: 'none' },
 					headerLeft: () => (
 						<Pressable
@@ -74,7 +74,7 @@ const Home = ({ navigation }) => {
 	);
 };
 
-export default Home;
+export default BottomTabNavigator;
 
 const styles = StyleSheet.create({
 	tabBarStyle: {
@@ -85,7 +85,6 @@ const styles = StyleSheet.create({
 		backdropFilter: 'blur(13.591408729553223)',
 	},
 	tabBarItemStyle: {
-		backgroundColor: '#FF6C00',
 		alignSelf: 'center',
 		borderRadius: 50,
 		width: 70,
