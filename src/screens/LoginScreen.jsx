@@ -1,10 +1,10 @@
 import { ContainerBG } from '../components/ContainerBG';
 import { LoginForm } from '../components/LoginForm';
 
-const LoginScreen = ({ navigation }) => {
+const LoginScreen = ({ route, navigation }) => {
 	return (
 		<ContainerBG>
-			<LoginForm navigation={navigation} />
+			<LoginForm navigation={navigation} route={route} />
 		</ContainerBG>
 	);
 };

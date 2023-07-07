@@ -1,10 +1,10 @@
 import { ContainerBG } from '../components/ContainerBG';
 import { RegistrationForm } from '../components/RegistrationForm';
 
-const RegistrationScreen = ({ navigation }) => {
+const RegistrationScreen = ({ navigation, route }) => {
 	return (
 		<ContainerBG>
-			<RegistrationForm navigation={navigation} />
+			<RegistrationForm navigation={navigation} route={route} />
 		</ContainerBG>
 	);
 };

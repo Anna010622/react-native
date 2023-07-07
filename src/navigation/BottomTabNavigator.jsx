@@ -7,7 +7,9 @@ import { Feather } from '@expo/vector-icons';
 
 const Tabs = createBottomTabNavigator();
 
-const BottomTabNavigator = ({ navigation }) => {
+const BottomTabNavigator = ({ navigation, route }) => {
+	const { setIsLoggedIn } = route.params;
+
 	return (
 		<Tabs.Navigator
 			initialRouteName="PostsScreen"
@@ -41,7 +43,7 @@ const BottomTabNavigator = ({ navigation }) => {
 					title: 'Публікації',
 					headerRight: () => (
 						<Pressable
-							onPress={() => navigation.navigate('Login')}
+							onPress={() => setIsLoggedIn(false)}
 							style={styles.btnLogOut}
 						>
 							<Feather name="log-out" size={24} color="#BDBDBD" />

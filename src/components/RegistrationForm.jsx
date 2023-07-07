@@ -30,7 +30,8 @@ const schema = yup
 	})
 	.required();
 
-export const RegistrationForm = ({ navigation }) => {
+export const RegistrationForm = ({ route, navigation }) => {
+	const { setIsLoggedIn } = route.params;
 	const [secureTextEntry, setSecureTextEntry] = useState(true);
 	const [isPasswordFocus, setIsPasswordFocus] = useState(false);
 	const [isEmailFocus, setIsEmailFocus] = useState(false);
@@ -57,7 +58,7 @@ export const RegistrationForm = ({ navigation }) => {
 	const initialValues = { login: '', email: '', password: '' };
 	const onSubmit = (values, { resetForm }) => {
 		console.log(values);
-		navigation.navigate('BottomTabNavigator');
+		setIsLoggedIn(true);
 		resetForm({ values: initialValues });
 	};
 
