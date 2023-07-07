@@ -78,6 +78,11 @@ export const RegistrationForm = ({ navigation }) => {
 						<View style={styles.inputWrapper}>
 							<TextInput
 								placeholder="Логін"
+								returnKeyType="next"
+								onSubmitEditing={() => {
+									secondTextInput.focus();
+								}}
+								blurOnSubmit={false}
 								placeholderTextColor="#BDBDBD"
 								onFocus={() => setIsLoginFocus(true)}
 								onBlur={() => setIsLoginFocus(false)}
@@ -95,6 +100,14 @@ export const RegistrationForm = ({ navigation }) => {
 						<View style={styles.inputWrapper}>
 							<TextInput
 								placeholder="Адреса електронної пошти"
+								returnKeyType="next"
+								ref={input => {
+									secondTextInput = input;
+								}}
+								onSubmitEditing={() => {
+									thirdTextInput.focus();
+								}}
+								blurOnSubmit={false}
 								placeholderTextColor="#BDBDBD"
 								onFocus={() => setIsEmailFocus(true)}
 								onBlur={() => setIsEmailFocus(false)}
@@ -112,6 +125,9 @@ export const RegistrationForm = ({ navigation }) => {
 						<View style={styles.inputWrapper}>
 							<TextInput
 								placeholder="Пароль"
+								ref={input => {
+									thirdTextInput = input;
+								}}
 								secureTextEntry={secureTextEntry}
 								placeholderTextColor="#BDBDBD"
 								onFocus={() => setIsPasswordFocus(true)}

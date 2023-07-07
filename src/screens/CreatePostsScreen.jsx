@@ -22,6 +22,11 @@ const CreatePostsScreen = () => {
 			<Text style={styles.text}>Завантажте фото</Text>
 			<TextInput
 				placeholder="Назва"
+				returnKeyType="next"
+				onSubmitEditing={() => {
+					secondTextInput.focus();
+				}}
+				blurOnSubmit={false}
 				placeholderTextColor="#BDBDBD"
 				onChangeText={text =>
 					text.length === 0 ? setIsName(false) : setIsName(true)
@@ -32,6 +37,9 @@ const CreatePostsScreen = () => {
 				<Feather name="map-pin" size={24} style={styles.inputIcon} />
 				<TextInput
 					placeholder="Місцевість..."
+					ref={input => {
+						secondTextInput = input;
+					}}
 					placeholderTextColor="#BDBDBD"
 					onChangeText={text =>
 						text.length === 0 ? setIsLocation(false) : setIsLocation(true)
