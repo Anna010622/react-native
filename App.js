@@ -3,6 +3,7 @@ import 'react-native-gesture-handler';
 import { useFonts } from 'expo-font';
 import { Keyboard, TouchableWithoutFeedback, View } from 'react-native';
 import MainNavigation from './src/navigation/MainNavigator';
+import { UserProvider } from './src/hooks/userContext';
 
 export default function App() {
 	const [fontsLoaded] = useFonts({
@@ -18,7 +19,9 @@ export default function App() {
 	return (
 		<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
 			<View style={{ flex: 1 }}>
-				<MainNavigation />
+				<UserProvider>
+					<MainNavigation />
+				</UserProvider>
 			</View>
 		</TouchableWithoutFeedback>
 	);

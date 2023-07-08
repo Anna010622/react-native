@@ -3,12 +3,12 @@ import { createStackNavigator } from '@react-navigation/stack';
 import LoginScreen from '../screens/LoginScreen';
 import RegistrationScreen from '../screens/RegistrationScreen';
 import BottomTabNavigator from './BottomTabNavigator';
-import { useState } from 'react';
+import { useUser } from '../hooks/userContext';
 
 const MainStack = createStackNavigator();
 
 const MainNavigation = () => {
-	const [isLoggedIn, setIsLoggedIn] = useState(false);
+	const { isLoggedIn } = useUser();
 
 	return (
 		<NavigationContainer>
@@ -21,19 +21,13 @@ const MainNavigation = () => {
 						<MainStack.Screen
 							name="Registration"
 							component={RegistrationScreen}
-							initialParams={{ setIsLoggedIn }}
 						/>
-						<MainStack.Screen
-							name="Login"
-							component={LoginScreen}
-							initialParams={{ setIsLoggedIn }}
-						/>
+						<MainStack.Screen name="Login" component={LoginScreen} />
 					</MainStack.Group>
 				) : (
 					<MainStack.Screen
 						name="BottomTabNavigator"
 						component={BottomTabNavigator}
-						initialParams={{ setIsLoggedIn }}
 					/>
 				)}
 			</MainStack.Navigator>

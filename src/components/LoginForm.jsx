@@ -3,6 +3,7 @@ import { Button } from './Button';
 import { useEffect, useState } from 'react';
 import { Formik } from 'formik';
 import * as yup from 'yup';
+import { useUser } from '../hooks/userContext';
 
 const schema = yup
 	.object({
@@ -18,12 +19,13 @@ const schema = yup
 	})
 	.required();
 
-export const LoginForm = ({ route, navigation }) => {
-	const { setIsLoggedIn } = route.params;
+export const LoginForm = ({ navigation }) => {
 	const [secureTextEntry, setSecureTextEntry] = useState(true);
 	const [isPasswordFocus, setIsPasswordFocus] = useState(false);
 	const [isEmailFocus, setIsEmailFocus] = useState(false);
 	const [isShowKeyboard, setIsShowKeyboard] = useState(false);
+
+	const { logIn } = useUser();
 
 	useEffect(() => {
 		const addPadding = Keyboard.addListener('keyboardDidShow', () => {
@@ -41,7 +43,7 @@ export const LoginForm = ({ route, navigation }) => {
 	const initialValues = { email: '', password: '' };
 	const onSubmit = (values, { resetForm }) => {
 		console.log(values);
-		setIsLoggedIn(true);
+		logIn(values.email);
 		resetForm({ values: initialValues });
 	};
 

@@ -11,6 +11,7 @@ import { useEffect, useState } from 'react';
 import { AntDesign } from '@expo/vector-icons';
 import { Formik } from 'formik';
 import * as yup from 'yup';
+import { useUser } from '../hooks/userContext';
 
 const schema = yup
 	.object({
@@ -30,13 +31,14 @@ const schema = yup
 	})
 	.required();
 
-export const RegistrationForm = ({ route, navigation }) => {
-	const { setIsLoggedIn } = route.params;
+export const RegistrationForm = ({ navigation }) => {
 	const [secureTextEntry, setSecureTextEntry] = useState(true);
 	const [isPasswordFocus, setIsPasswordFocus] = useState(false);
 	const [isEmailFocus, setIsEmailFocus] = useState(false);
 	const [isLoginFocus, setIsLoginFocus] = useState(false);
 	const [isShowKeyboard, setIsShowKeyboard] = useState(false);
+
+	const { signUp } = useUser();
 
 	useEffect(() => {
 		const addPadding = Keyboard.addListener('keyboardDidShow', () => {
@@ -58,7 +60,7 @@ export const RegistrationForm = ({ route, navigation }) => {
 	const initialValues = { login: '', email: '', password: '' };
 	const onSubmit = (values, { resetForm }) => {
 		console.log(values);
-		setIsLoggedIn(true);
+		signUp(values.login, values.email);
 		resetForm({ values: initialValues });
 	};
 
