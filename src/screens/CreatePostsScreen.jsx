@@ -1,25 +1,70 @@
-import { Pressable } from 'react-native';
+import { Image, Pressable } from 'react-native';
 import { StyleSheet, Text, View, TextInput } from 'react-native';
 import { MaterialIcons, Feather } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Button } from '../components/Button';
+import { Camera } from 'expo-camera';
 
 const CreatePostsScreen = () => {
 	const [isName, setIsName] = useState(false);
 	const [isLocation, setIsLocation] = useState(false);
 
+	const [hasPermission, setHasPermission] = useState(null);
+	const [type, setType] = useState(Camera.Constants.Type.back);
+	const cameraRef = useRef(null);
+	const [image, setImage] = useState(null);
+
+	useEffect(() => {
+		(async () => {
+			const cameraStatus = await Camera.requestCameraPermissionsAsync();
+			setHasPermission(cameraStatus.status === 'granted');
+		})();
+	}, []);
+
+	const takePicture = async () => {
+		if (cameraRef) {
+			try {
+				const data = await cameraRef.current.takePictureAsync();
+				setImage(data.uri);
+			} catch (error) {
+				console.log(error);
+			}
+		}
+	};
+
+	const editPicture = () => setImage(null);
+
 	const handlePublish = () => {
 		console.log('publish');
 	};
 
+	if (hasPermission === false) {
+		return <Text>No access to camera</Text>;
+	}
+
 	return (
 		<View style={styles.container}>
-			<Pressable style={styles.imgContainer}>
-				<View style={styles.iconContainer}>
-					<MaterialIcons name="camera-alt" size={24} color="#BDBDBD" />
-				</View>
-			</Pressable>
-			<Text style={styles.text}>Завантажте фото</Text>
+			<View style={styles.imgContainer}>
+				<Pressable
+					style={[styles.cameraBtn, image && styles.opacity]}
+					onPress={!image ? takePicture : editPicture}
+				>
+					<MaterialIcons
+						name="camera-alt"
+						size={24}
+						color={!image ? '#BDBDBD' : '#FFFFFF'}
+					/>
+				</Pressable>
+
+				{image ? (
+					<Image source={{ uri: image }} style={styles.camera} />
+				) : (
+					<Camera type={type} ref={cameraRef} style={styles.camera} />
+				)}
+			</View>
+			<Text style={styles.text}>
+				{!image ? 'Завантажте фото' : 'Редагувати фото'}
+			</Text>
 			<TextInput
 				placeholder="Назва"
 				returnKeyType="next"
@@ -82,19 +127,29 @@ const styles = StyleSheet.create({
 		backgroundColor: '#FFFFFF',
 	},
 	imgContainer: {
-		justifyContent: 'center',
-		alignItems: 'center',
 		marginBottom: 8,
 		height: 240,
+		borderRadius: 8,
+		overflow: 'hidden',
 		backgroundColor: '#E8E8E8',
+		justifyContent: 'center',
 	},
-	iconContainer: {
+	camera: {
+		flex: 1,
+	},
+	cameraBtn: {
+		position: 'absolute',
+		zIndex: 1,
 		justifyContent: 'center',
 		alignItems: 'center',
 		width: 60,
 		height: 60,
 		backgroundColor: '#FFFFFF',
 		borderRadius: 50,
+		alignSelf: 'center',
+	},
+	opacity: {
+		backgroundColor: 'rgba(255, 255, 255, 0.3)',
 	},
 	text: {
 		marginBottom: 32,
