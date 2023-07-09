@@ -4,13 +4,15 @@ import {
 	SafeAreaView,
 	Text,
 	View,
+	Image,
 	Pressable,
+	FlatList,
 } from 'react-native';
 import { useUser } from '../hooks/userContext';
 import { AntDesign, Feather } from '@expo/vector-icons';
 
-const ProfileScreen = () => {
-	const { userName, logOut } = useUser();
+const ProfileScreen = ({ navigation }) => {
+	const { userName, logOut, userPosts } = useUser();
 
 	const handleAddImg = () => {
 		console.log('add img');
@@ -34,6 +36,99 @@ const ProfileScreen = () => {
 							<Feather name="log-out" size={24} color="#BDBDBD" />
 						</Pressable>
 						<Text style={styles.userName}>{userName ? 'Name' : userName}</Text>
+
+						<View style={styles.container}>
+							<FlatList
+								data={userPosts}
+								renderItem={({ item }) => (
+									<View style={styles.item}>
+										<View style={styles.imageContainer}>
+											<Image
+												source={{ uri: item.image }}
+												style={styles.postImg}
+											/>
+										</View>
+										<Text style={styles.postName}>{item.name}</Text>
+										<View style={styles.postInformationContainer}>
+											<View style={styles.containerBtn}>
+												<Pressable
+													style={styles.commentsBtn}
+													onPress={() =>
+														navigation.navigate('CommentsScreen', {
+															comments: item.comments,
+															img: item.image,
+														})
+													}
+												>
+													<Feather
+														name="message-circle"
+														size={24}
+														style={[
+															styles.commentsIcon,
+															item.comments.length === 0 &&
+																styles.inactiveColor,
+														]}
+													/>
+													<Text
+														style={[
+															styles.commentsSum,
+															item.comments.length === 0 &&
+																styles.inactiveColor,
+														]}
+													>
+														{item.comments.length}
+													</Text>
+												</Pressable>
+
+												<Pressable
+													style={styles.commentsBtn}
+													onPress={() => console.log('like')}
+												>
+													<Feather
+														name="thumbs-up"
+														size={24}
+														style={[
+															styles.commentsIcon,
+															item.likes === 0 && styles.inactiveColor,
+														]}
+													/>
+													<Text
+														style={[
+															styles.commentsSum,
+															item.likes === 0 && styles.inactiveColor,
+														]}
+													>
+														{item.comments.length}
+													</Text>
+												</Pressable>
+											</View>
+											<Pressable
+												style={styles.commentsBtn}
+												onPress={() => {
+													if (typeof item.location.coords === 'object') {
+														navigation.navigate('MapScreen', {
+															coords: item.location.coords,
+															name: item.name,
+														});
+													} else {
+														alert('No information');
+													}
+												}}
+											>
+												<Feather
+													name="map-pin"
+													size={24}
+													style={styles.inactiveColor}
+												/>
+												<Text style={styles.location}>
+													{item.location.title}
+												</Text>
+											</Pressable>
+										</View>
+									</View>
+								)}
+							/>
+						</View>
 					</View>
 				</SafeAreaView>
 			</ImageBackground>
@@ -91,6 +186,57 @@ const styles = StyleSheet.create({
 		fontFamily: 'Roboto-Medium',
 		fontSize: 30,
 		letterSpacing: 0.3,
+	},
+
+	item: {
+		marginBottom: 32,
+	},
+	imageContainer: {
+		marginBottom: 8,
+		height: 240,
+		borderRadius: 8,
+		overflow: 'hidden',
+		backgroundColor: '#E8E8E8',
+		justifyContent: 'center',
+	},
+	postImg: {
+		flex: 1,
+	},
+	postName: {
+		flex: 1,
+		marginBottom: 10,
+		color: '#212121',
+		fontFamily: 'Roboto-Medium',
+		fontSize: 16,
+	},
+	postInformationContainer: {
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+	},
+	containerBtn: {
+		flexDirection: 'row',
+		gap: 24,
+	},
+	commentsBtn: {
+		flexDirection: 'row',
+		gap: 5,
+	},
+	commentsIcon: {
+		color: '#FF6C00',
+	},
+	inactiveColor: {
+		color: '#BDBDBD',
+	},
+	commentsSum: {
+		color: '#212121',
+		fontFamily: 'Roboto-Regular',
+		fontSize: 16,
+	},
+	location: {
+		color: '#212121',
+		fontFamily: 'Roboto-Regular',
+		fontSize: 16,
+		textDecorationLine: 'underline',
 	},
 });
 

@@ -32,7 +32,12 @@ const PostScreen = ({ navigation }) => {
 						<View style={styles.postInformationContainer}>
 							<Pressable
 								style={styles.commentsBtn}
-								onPress={() => navigation.navigate('CommentsScreen')}
+								onPress={() =>
+									navigation.navigate('CommentsScreen', {
+										comments: item.comments,
+										img: item.image,
+									})
+								}
 							>
 								<Feather
 									name="message-circle"
