@@ -10,9 +10,42 @@ import {
 } from 'react-native';
 import { useUser } from '../hooks/userContext';
 import { AntDesign, Feather } from '@expo/vector-icons';
+import { useEffect, useRef, useState } from 'react';
+import { Camera } from 'expo-camera';
 
 const ProfileScreen = ({ navigation }) => {
-	const { userName, logOut, userPosts } = useUser();
+	const [hasPermission, setHasPermission] = useState(null);
+	const cameraRef = useRef(null);
+	const [cameraOn, setCameraOn] = useState(false);
+	const [type, setType] = useState(Camera.Constants.Type.back);
+
+	const { userName, logOut, userPosts, userPhoto, addUserPhoto } = useUser();
+
+	useEffect(() => {
+		(async () => {
+			const cameraStatus = await Camera.requestCameraPermissionsAsync();
+			setHasPermission(cameraStatus.status === 'granted');
+		})();
+	}, []);
+
+	const takePicture = async () => {
+		if (cameraRef) {
+			try {
+				const data = await cameraRef.current.takePictureAsync();
+				addUserPhoto(data.uri);
+			} catch (error) {
+				console.log(error);
+			}
+		}
+	};
+	const cameraTurnOn = () => {
+		setCameraOn(true);
+	};
+
+	handleDeleteImg = () => {
+		addUserPhoto(null);
+		setCameraOn(false);
+	};
 
 	const handleAddImg = () => {
 		console.log('add img');
@@ -28,14 +61,35 @@ const ProfileScreen = ({ navigation }) => {
 				<SafeAreaView style={styles.container}>
 					<View style={styles.inner}>
 						<View style={styles.imgBox}>
-							<Pressable onPress={handleAddImg} style={styles.addBtnWrapper}>
-								<AntDesign name="plus" size={18} color="#FF6C00" />
-							</Pressable>
+							{cameraOn && !userPhoto && (
+								<Camera type={type} ref={cameraRef} style={styles.camera} />
+							)}
+							{userPhoto && (
+								<Image source={{ uri: userPhoto }} style={styles.userPhoto} />
+							)}
+							{!userPhoto ? (
+								<Pressable
+									onPress={!cameraOn ? cameraTurnOn : takePicture}
+									style={styles.addBtnWrapper}
+								>
+									<AntDesign name="plus" size={18} color="#FF6C00" />
+								</Pressable>
+							) : (
+								<Pressable
+									onPress={handleDeleteImg}
+									style={[
+										styles.addBtnWrapper,
+										userPhoto && styles.addBtnWrapperGray,
+									]}
+								>
+									<AntDesign name="close" size={18} color="#E8E8E8" />
+								</Pressable>
+							)}
 						</View>
 						<Pressable onPress={() => logOut()} style={styles.btnLogOut}>
 							<Feather name="log-out" size={24} color="#BDBDBD" />
 						</Pressable>
-						<Text style={styles.userName}>{userName ? 'Name' : userName}</Text>
+						<Text style={styles.userName}>{!userName ? 'Name' : userName}</Text>
 
 						<View style={styles.container}>
 							<FlatList
@@ -161,6 +215,10 @@ const styles = StyleSheet.create({
 		alignSelf: 'center',
 		backgroundColor: '#F6F6F6',
 	},
+	userPhoto: {
+		flex: 1,
+		borderRadius: 16,
+	},
 	addBtnWrapper: {
 		position: 'absolute',
 		right: -12,
@@ -173,6 +231,9 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 		alignItems: 'center',
 		backgroundColor: '#FFFFFF',
+	},
+	addBtnWrapperGray: {
+		borderColor: '#BDBDBD',
 	},
 	btnLogOut: {
 		position: 'absolute',
@@ -237,6 +298,10 @@ const styles = StyleSheet.create({
 		fontFamily: 'Roboto-Regular',
 		fontSize: 16,
 		textDecorationLine: 'underline',
+	},
+	camera: {
+		flex: 1,
+		borderRadius: 16,
 	},
 });
 

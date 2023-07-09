@@ -5,13 +5,15 @@ import {
 	TextInput,
 	Pressable,
 	Keyboard,
+	Image,
 } from 'react-native';
 import { Button } from './Button';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AntDesign } from '@expo/vector-icons';
 import { Formik } from 'formik';
 import * as yup from 'yup';
 import { useUser } from '../hooks/userContext';
+import { Camera } from 'expo-camera';
 
 const schema = yup
 	.object({
@@ -37,8 +39,13 @@ export const RegistrationForm = ({ navigation }) => {
 	const [isEmailFocus, setIsEmailFocus] = useState(false);
 	const [isLoginFocus, setIsLoginFocus] = useState(false);
 	const [isShowKeyboard, setIsShowKeyboard] = useState(false);
+	const [hasPermission, setHasPermission] = useState(null);
+	const cameraRef = useRef(null);
+	const [cameraOn, setCameraOn] = useState(false);
+	const [type, setType] = useState(Camera.Constants.Type.back);
+	const [image, setImage] = useState(null);
 
-	const { signUp } = useUser();
+	const { signUp, addUserPhoto } = useUser();
 
 	useEffect(() => {
 		const addPadding = Keyboard.addListener('keyboardDidShow', () => {
@@ -53,8 +60,31 @@ export const RegistrationForm = ({ navigation }) => {
 		};
 	}, []);
 
-	const handleAddImg = () => {
-		console.log('add img');
+	useEffect(() => {
+		(async () => {
+			const cameraStatus = await Camera.requestCameraPermissionsAsync();
+			setHasPermission(cameraStatus.status === 'granted');
+		})();
+	}, []);
+
+	const takePicture = async () => {
+		if (cameraRef) {
+			try {
+				const data = await cameraRef.current.takePictureAsync();
+				setImage(data.uri);
+				addUserPhoto(data.uri);
+			} catch (error) {
+				console.log(error);
+			}
+		}
+	};
+	const cameraTurnOn = () => {
+		setCameraOn(true);
+	};
+
+	handleDeleteImg = () => {
+		setImage(null);
+		setCameraOn(false);
 	};
 
 	const initialValues = { login: '', email: '', password: '' };
@@ -73,10 +103,31 @@ export const RegistrationForm = ({ navigation }) => {
 			{({ handleChange, handleSubmit, values, errors, touched }) => (
 				<View style={styles.form}>
 					<View style={styles.imgBox}>
-						<Pressable onPress={handleAddImg} style={styles.addBtnWrapper}>
-							<AntDesign name="plus" size={18} color="#FF6C00" />
-						</Pressable>
+						{cameraOn && !image && (
+							<Camera type={type} ref={cameraRef} style={styles.camera} />
+						)}
+						{image && <Image source={{ uri: image }} style={styles.camera} />}
+
+						{!image ? (
+							<Pressable
+								onPress={!cameraOn ? cameraTurnOn : takePicture}
+								style={styles.addBtnWrapper}
+							>
+								<AntDesign name="plus" size={18} color="#FF6C00" />
+							</Pressable>
+						) : (
+							<Pressable
+								onPress={handleDeleteImg}
+								style={[
+									styles.addBtnWrapper,
+									image && styles.addBtnWrapperGray,
+								]}
+							>
+								<AntDesign name="close" size={18} color="#E8E8E8" />
+							</Pressable>
+						)}
 					</View>
+
 					<Text style={styles.header}>Реєстрація</Text>
 
 					<View style={isShowKeyboard && styles.inputContainer}>
@@ -200,6 +251,9 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		backgroundColor: '#FFFFFF',
 	},
+	addBtnWrapperGray: {
+		borderColor: '#BDBDBD',
+	},
 	header: {
 		marginBottom: 33,
 
@@ -251,5 +305,9 @@ const styles = StyleSheet.create({
 		color: 'red',
 		paddingHorizontal: 16,
 		paddingTop: 4,
+	},
+	camera: {
+		flex: 1,
+		borderRadius: 16,
 	},
 });

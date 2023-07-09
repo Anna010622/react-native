@@ -8,6 +8,7 @@ export const UserProvider = ({ children }) => {
 	const [isLoggedIn, setIsLoggedIn] = useState(false);
 	const [userName, setUserName] = useState(null);
 	const [userEmail, setUserEmail] = useState(null);
+	const [userPhoto, setUserPhoto] = useState(null);
 	const [userPosts, setUserPosts] = useState([]);
 
 	const logIn = name => {
@@ -30,6 +31,10 @@ export const UserProvider = ({ children }) => {
 		setUserPosts(prevState => [...prevState, newPost]);
 	};
 
+	const addUserPhoto = photo => {
+		setUserPhoto(photo);
+	};
+
 	return (
 		<UserContext.Provider
 			value={{
@@ -37,10 +42,12 @@ export const UserProvider = ({ children }) => {
 				userName,
 				userEmail,
 				userPosts,
+				userPhoto,
 				logIn,
 				logOut,
 				signUp,
 				addPost,
+				addUserPhoto,
 			}}
 		>
 			{children}

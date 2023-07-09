@@ -10,12 +10,16 @@ import { useUser } from '../hooks/userContext';
 import { Feather } from '@expo/vector-icons';
 
 const PostScreen = ({ navigation }) => {
-	const { userName, userEmail, userPosts } = useUser();
+	const { userName, userEmail, userPosts, userPhoto } = useUser();
 
 	return (
 		<View style={styles.container}>
 			<View style={styles.userWrapper}>
-				<View style={styles.userPhoto}></View>
+				<View style={styles.userPhotoContainer}>
+					{userPhoto && (
+						<Image source={{ uri: userPhoto }} style={styles.userPhoto} />
+					)}
+				</View>
 				<View>
 					{userName && <Text style={styles.userName}>{userName}</Text>}
 					{userEmail && <Text style={styles.userEmail}>{userEmail}</Text>}
@@ -97,11 +101,12 @@ const styles = StyleSheet.create({
 		columnGap: 8,
 		marginBottom: 32,
 	},
-	userPhoto: {
+	userPhotoContainer: {
 		width: 60,
 		height: 60,
 		borderRadius: 16,
 		backgroundColor: '#E8E8E8',
+		overflow: 'hidden',
 	},
 	userName: {
 		color: '#212121',
@@ -112,6 +117,9 @@ const styles = StyleSheet.create({
 		color: 'rgba(33, 33, 33, 0.80)',
 		fontFamily: 'Roboto-Regular',
 		fontSize: 11,
+	},
+	userPhoto: {
+		flex: 1,
 	},
 	item: {
 		marginBottom: 32,
