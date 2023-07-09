@@ -8,6 +8,7 @@ export const UserProvider = ({ children }) => {
 	const [isLoggedIn, setIsLoggedIn] = useState(false);
 	const [userName, setUserName] = useState(null);
 	const [userEmail, setUserEmail] = useState(null);
+	const [userPosts, setUserPosts] = useState([]);
 
 	const logIn = name => {
 		setIsLoggedIn(true);
@@ -25,9 +26,22 @@ export const UserProvider = ({ children }) => {
 		setUserEmail(null);
 	};
 
+	const addPost = newPost => {
+		setUserPosts(prevState => [...prevState, newPost]);
+	};
+
 	return (
 		<UserContext.Provider
-			value={{ isLoggedIn, userName, userEmail, logIn, logOut, signUp }}
+			value={{
+				isLoggedIn,
+				userName,
+				userEmail,
+				userPosts,
+				logIn,
+				logOut,
+				signUp,
+				addPost,
+			}}
 		>
 			{children}
 		</UserContext.Provider>

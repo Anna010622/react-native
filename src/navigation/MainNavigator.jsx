@@ -3,7 +3,10 @@ import { createStackNavigator } from '@react-navigation/stack';
 import LoginScreen from '../screens/LoginScreen';
 import RegistrationScreen from '../screens/RegistrationScreen';
 import BottomTabNavigator from './BottomTabNavigator';
+import CommentsScreen from '../screens/CommentsScreen';
+import MapScreen from '../screens/MapScreen';
 import { useUser } from '../hooks/userContext';
+import { StyleSheet } from 'react-native';
 
 const MainStack = createStackNavigator();
 
@@ -12,12 +15,9 @@ const MainNavigation = () => {
 
 	return (
 		<NavigationContainer>
-			<MainStack.Navigator
-				screenOptions={{ headerShown: false }}
-				initialRouteName="Login"
-			>
+			<MainStack.Navigator initialRouteName="Login">
 				{!isLoggedIn ? (
-					<MainStack.Group>
+					<MainStack.Group screenOptions={{ headerShown: false }}>
 						<MainStack.Screen
 							name="Registration"
 							component={RegistrationScreen}
@@ -25,14 +25,46 @@ const MainNavigation = () => {
 						<MainStack.Screen name="Login" component={LoginScreen} />
 					</MainStack.Group>
 				) : (
-					<MainStack.Screen
-						name="BottomTabNavigator"
-						component={BottomTabNavigator}
-					/>
+					<>
+						<MainStack.Group screenOptions={{ headerShown: false }}>
+							<MainStack.Screen
+								name="BottomTabNavigator"
+								component={BottomTabNavigator}
+							/>
+						</MainStack.Group>
+
+						<MainStack.Group
+							screenOptions={{
+								headerShown: true,
+								headerTitleStyle: styles.headerTitleStyle,
+								headerTitleAlign: 'center',
+								headerLeftContainerStyle: {
+									opacity: 0.8,
+								},
+							}}
+						>
+							<MainStack.Screen
+								name="CommentsScreen"
+								component={CommentsScreen}
+								screenOptions={{ headerShown: true }}
+							/>
+							<MainStack.Screen name="MapScreen" component={MapScreen} />
+						</MainStack.Group>
+					</>
 				)}
 			</MainStack.Navigator>
 		</NavigationContainer>
 	);
 };
+
+const styles = StyleSheet.create({
+	headerTitleStyle: {
+		color: '#212121',
+		fontFamily: 'Roboto-Medium',
+		fontSize: 17,
+		lineHeight: 22,
+		letterSpacing: -0.408,
+	},
+});
 
 export default MainNavigation;

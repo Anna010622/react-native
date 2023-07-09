@@ -4,20 +4,26 @@ import { MaterialIcons, Feather } from '@expo/vector-icons';
 import { useEffect, useState, useRef } from 'react';
 import { Button } from '../components/Button';
 import { Camera } from 'expo-camera';
+import * as Location from 'expo-location';
+import { useUser } from '../hooks/userContext';
 
-const CreatePostsScreen = () => {
-	const [isName, setIsName] = useState(false);
-	const [isLocation, setIsLocation] = useState(false);
+const CreatePostsScreen = ({ navigation }) => {
+	const [location, setLocation] = useState('');
+	const [image, setImage] = useState(null);
+	const [name, setName] = useState('');
 
 	const [hasPermission, setHasPermission] = useState(null);
+	const [hasLocationPermission, setHasLocationPermission] = useState(null);
 	const [type, setType] = useState(Camera.Constants.Type.back);
 	const cameraRef = useRef(null);
-	const [image, setImage] = useState(null);
+	const { addPost } = useUser();
 
 	useEffect(() => {
 		(async () => {
 			const cameraStatus = await Camera.requestCameraPermissionsAsync();
 			setHasPermission(cameraStatus.status === 'granted');
+			let locationStatus = await Location.requestForegroundPermissionsAsync();
+			setHasLocationPermission(locationStatus.status === 'granted');
 		})();
 	}, []);
 
@@ -34,12 +40,46 @@ const CreatePostsScreen = () => {
 
 	const editPicture = () => setImage(null);
 
-	const handlePublish = () => {
-		console.log('publish');
+	const createPost = async () => {
+		if (hasLocationPermission) {
+			let loc = await Location.getCurrentPositionAsync({});
+			const coords = {
+				latitude: loc.coords.latitude,
+				longitude: loc.coords.longitude,
+			};
+			return {
+				image,
+				name,
+				location: { title: location, coords },
+				comments: [],
+				likes: 0,
+			};
+		} else {
+			return {
+				image,
+				name,
+				location: { title: location, coords: 'No information' },
+				comments: [],
+				likes: 0,
+			};
+		}
+	};
+
+	const handlePublish = async () => {
+		const post = await createPost();
+		addPost(post);
+		navigation.navigate('PostsScreen');
+		setImage(null);
+		setName('');
+		setLocation('');
 	};
 
 	if (hasPermission === false) {
-		return <Text>No access to camera</Text>;
+		return (
+			<View style={styles.errorContainer}>
+				<Text style={styles.errorMessage}>No access to camera</Text>
+			</View>
+		);
 	}
 
 	return (
@@ -73,10 +113,9 @@ const CreatePostsScreen = () => {
 				}}
 				blurOnSubmit={false}
 				placeholderTextColor="#BDBDBD"
-				onChangeText={text =>
-					text.length === 0 ? setIsName(false) : setIsName(true)
-				}
-				style={[styles.input, !isName && styles.textPlaceholder]}
+				value={name}
+				onChangeText={setName}
+				style={[styles.input, !name && styles.textPlaceholder]}
 			/>
 			<View style={styles.inputField}>
 				<Feather name="map-pin" size={24} style={styles.inputIcon} />
@@ -86,12 +125,11 @@ const CreatePostsScreen = () => {
 						secondTextInput = input;
 					}}
 					placeholderTextColor="#BDBDBD"
-					onChangeText={text =>
-						text.length === 0 ? setIsLocation(false) : setIsLocation(true)
-					}
+					value={location}
+					onChangeText={setLocation}
 					style={[
 						styles.input,
-						!isLocation && styles.textPlaceholder,
+						!location && styles.textPlaceholder,
 						styles.inputTextWithIconLeft,
 					]}
 				/>
@@ -99,7 +137,7 @@ const CreatePostsScreen = () => {
 			<Button
 				text="Опубліковати"
 				onPressFunction={handlePublish}
-				disabled={true}
+				disabled={(!image || !name || !location) && true}
 			/>
 			<Pressable
 				style={[styles.btnDelete, styles.btnDeleteDisable]}
@@ -198,5 +236,18 @@ const styles = StyleSheet.create({
 	},
 	iconDeleteDisable: {
 		color: '#BDBDBD',
+	},
+	errorContainer: {
+		flex: 1,
+		backgroundColor: '#FFFFFF',
+		justifyContent: 'center',
+		alignItems: 'center',
+	},
+	errorMessage: {
+		color: '#212121',
+		textAlign: 'center',
+		fontFamily: 'Roboto-Medium',
+		fontSize: 17,
+		letterSpacing: 0.3,
 	},
 });
