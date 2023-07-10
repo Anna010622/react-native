@@ -6,6 +6,7 @@ import { Button } from '../components/Button';
 import { Camera } from 'expo-camera';
 import * as Location from 'expo-location';
 import { useUser } from '../hooks/userContext';
+import { useIsFocused } from '@react-navigation/native';
 
 const CreatePostsScreen = ({ navigation }) => {
 	const [location, setLocation] = useState('');
@@ -17,6 +18,7 @@ const CreatePostsScreen = ({ navigation }) => {
 	const [type, setType] = useState(Camera.Constants.Type.back);
 	const cameraRef = useRef(null);
 	const { addPost } = useUser();
+	const isFocused = useIsFocused();
 
 	useEffect(() => {
 		(async () => {
@@ -26,6 +28,12 @@ const CreatePostsScreen = ({ navigation }) => {
 			setHasLocationPermission(locationStatus.status === 'granted');
 		})();
 	}, []);
+
+	useEffect(() => {
+		if (!isFocused) {
+			reset();
+		}
+	});
 
 	const takePicture = async () => {
 		if (cameraRef) {
@@ -69,6 +77,12 @@ const CreatePostsScreen = ({ navigation }) => {
 		const post = await createPost();
 		addPost(post);
 		navigation.navigate('PostsScreen');
+		setImage(null);
+		setName('');
+		setLocation('');
+	};
+
+	const reset = () => {
 		setImage(null);
 		setName('');
 		setLocation('');
@@ -137,17 +151,23 @@ const CreatePostsScreen = ({ navigation }) => {
 			<Button
 				text="Опубліковати"
 				onPressFunction={handlePublish}
-				disabled={(!image || !name || !location) && true}
+				disabled={!image && true}
 			/>
 			<Pressable
-				style={[styles.btnDelete, styles.btnDeleteDisable]}
-				onPress={handlePublish}
-				disabled={true}
+				style={[
+					styles.btnDelete,
+					!image && !name && !location && styles.btnDeleteDisable,
+				]}
+				onPress={reset}
+				disabled={!image && !name && !location && true}
 			>
 				<Feather
 					name="trash-2"
 					size={24}
-					style={[styles.iconDeleteActive, styles.iconDeleteDisable]}
+					style={[
+						styles.iconDeleteActive,
+						!image && !name && !location && styles.iconDeleteDisable,
+					]}
 				/>
 			</Pressable>
 		</View>

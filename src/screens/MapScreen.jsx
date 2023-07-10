@@ -1,4 +1,4 @@
-import { View, StyleSheet, Dimensions } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 
 const MapScreen = ({ route }) => {
@@ -36,8 +36,8 @@ const styles = StyleSheet.create({
 		backgroundColor: '#FFFFFF',
 	},
 	mapStyle: {
-		width: Dimensions.get('window').width,
-		height: Dimensions.get('window').height,
+		width: '100%',
+		height: '100%',
 	},
 });
 

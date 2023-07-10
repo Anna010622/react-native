@@ -8,81 +8,27 @@ import {
 } from 'react-native';
 import { useUser } from '../hooks/userContext';
 import { Feather } from '@expo/vector-icons';
+import { useCallback } from 'react';
 
 const PostScreen = ({ navigation }) => {
 	const { userName, userEmail, userPosts, userPhoto } = useUser();
 
+	const renderItem = useCallback(
+		({ item }) => <Item item={item} navigation={navigation} />,
+		[]
+	);
+
+	const headerList = () => (
+		<User userName={userName} userEmail={userEmail} userPhoto={userPhoto} />
+	);
+
 	return (
 		<View style={styles.container}>
-			<View style={styles.userWrapper}>
-				<View style={styles.userPhotoContainer}>
-					{userPhoto && (
-						<Image source={{ uri: userPhoto }} style={styles.userPhoto} />
-					)}
-				</View>
-				<View>
-					{userName && <Text style={styles.userName}>{userName}</Text>}
-					{userEmail && <Text style={styles.userEmail}>{userEmail}</Text>}
-				</View>
-			</View>
 			<FlatList
 				data={userPosts}
-				renderItem={({ item }) => (
-					<View style={styles.item}>
-						<View style={styles.imageContainer}>
-							<Image source={{ uri: item.image }} style={styles.postImg} />
-						</View>
-						<Text style={styles.postName}>{item.name}</Text>
-						<View style={styles.postInformationContainer}>
-							<Pressable
-								style={styles.commentsBtn}
-								onPress={() =>
-									navigation.navigate('CommentsScreen', {
-										comments: item.comments,
-										img: item.image,
-									})
-								}
-							>
-								<Feather
-									name="message-circle"
-									size={24}
-									style={[
-										styles.commentsIcon,
-										item.comments.length === 0 && styles.inactiveColor,
-									]}
-								/>
-								<Text
-									style={[
-										styles.commentsSum,
-										item.comments.length === 0 && styles.inactiveColor,
-									]}
-								>
-									{item.comments.length}
-								</Text>
-							</Pressable>
-							<Pressable
-								style={styles.commentsBtn}
-								onPress={() => {
-									if (typeof item.location.coords === 'object') {
-										navigation.navigate('MapScreen', {
-											coords: item.location.coords,
-											name: item.name,
-										});
-									} else {
-										alert('No information');
-									}
-								}}
-							>
-								<Feather
-									name="map-pin"
-									size={24}
-									style={styles.inactiveColor}
-								/>
-								<Text style={styles.location}>{item.location.title}</Text>
-							</Pressable>
-						</View>
-					</View>
-				)}
+				renderItem={renderItem}
+				keyExtractor={item => item.image}
+				ListHeaderComponent={headerList}
 			/>
 		</View>
 	);
@@ -92,14 +38,13 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		paddingHorizontal: 16,
-		paddingTop: 32,
 		backgroundColor: '#FFFFFF',
 	},
 	userWrapper: {
 		flexDirection: 'row',
 		alignItems: 'center',
 		columnGap: 8,
-		marginBottom: 32,
+		marginVertical: 32,
 	},
 	userPhotoContainer: {
 		width: 60,
@@ -170,3 +115,70 @@ const styles = StyleSheet.create({
 });
 
 export default PostScreen;
+
+const Item = ({ item, navigation }) => (
+	<View style={styles.item}>
+		<View style={styles.imageContainer}>
+			<Image source={{ uri: item.image }} style={styles.postImg} />
+		</View>
+		{item.name && <Text style={styles.postName}>{item.name}</Text>}
+		<View style={styles.postInformationContainer}>
+			<Pressable
+				style={styles.commentsBtn}
+				onPress={() =>
+					navigation.navigate('CommentsScreen', {
+						comments: item.comments,
+						img: item.image,
+					})
+				}
+			>
+				<Feather
+					name="message-circle"
+					size={24}
+					style={[
+						styles.commentsIcon,
+						item.comments.length === 0 && styles.inactiveColor,
+					]}
+				/>
+				<Text
+					style={[
+						styles.commentsSum,
+						item.comments.length === 0 && styles.inactiveColor,
+					]}
+				>
+					{item.comments.length}
+				</Text>
+			</Pressable>
+			<Pressable
+				style={styles.commentsBtn}
+				onPress={() => {
+					if (typeof item.location.coords === 'object') {
+						navigation.navigate('MapScreen', {
+							coords: item.location.coords,
+							name: item.name,
+						});
+					} else {
+						alert('No information');
+					}
+				}}
+			>
+				<Feather name="map-pin" size={24} style={styles.inactiveColor} />
+				<Text style={styles.location}>{item.location.title}</Text>
+			</Pressable>
+		</View>
+	</View>
+);
+
+const User = ({ userPhoto, userName, userEmail }) => (
+	<View style={styles.userWrapper}>
+		<View style={styles.userPhotoContainer}>
+			{userPhoto && (
+				<Image source={{ uri: userPhoto }} style={styles.userPhoto} />
+			)}
+		</View>
+		<View>
+			{userName && <Text style={styles.userName}>{userName}</Text>}
+			{userEmail && <Text style={styles.userEmail}>{userEmail}</Text>}
+		</View>
+	</View>
+);
