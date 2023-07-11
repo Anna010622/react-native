@@ -7,10 +7,11 @@ import {
 	Image,
 	Pressable,
 	FlatList,
+	Dimensions,
 } from 'react-native';
 import { useUser } from '../hooks/userContext';
 import { AntDesign, Feather } from '@expo/vector-icons';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Camera } from 'expo-camera';
 
 const ProfileScreen = ({ navigation }) => {
@@ -27,6 +28,25 @@ const ProfileScreen = ({ navigation }) => {
 			setHasPermission(cameraStatus.status === 'granted');
 		})();
 	}, []);
+
+	const renderItem = useCallback(
+		({ item }) => <Item item={item} navigation={navigation} />,
+		[]
+	);
+
+	const headerList = () => (
+		<User
+			userName={userName}
+			userPhoto={userPhoto}
+			logOut={logOut}
+			cameraOn={cameraOn}
+			cameraTurnOn={cameraTurnOn}
+			handleDeleteImg={handleDeleteImg}
+			takePicture={takePicture}
+			cameraRef={cameraRef}
+			type={type}
+		/>
+	);
 
 	const takePicture = async () => {
 		if (cameraRef) {
@@ -47,10 +67,6 @@ const ProfileScreen = ({ navigation }) => {
 		setCameraOn(false);
 	};
 
-	const handleAddImg = () => {
-		console.log('add img');
-	};
-
 	return (
 		<View style={styles.container}>
 			<ImageBackground
@@ -58,133 +74,17 @@ const ProfileScreen = ({ navigation }) => {
 				resizeMode="cover"
 				style={styles.backgroundImg}
 			>
-				<SafeAreaView style={styles.container}>
-					<View style={styles.inner}>
-						<View style={styles.imgBox}>
-							{cameraOn && !userPhoto && (
-								<Camera type={type} ref={cameraRef} style={styles.camera} />
-							)}
-							{userPhoto && (
-								<Image source={{ uri: userPhoto }} style={styles.userPhoto} />
-							)}
-							{!userPhoto ? (
-								<Pressable
-									onPress={!cameraOn ? cameraTurnOn : takePicture}
-									style={styles.addBtnWrapper}
-								>
-									<AntDesign name="plus" size={18} color="#FF6C00" />
-								</Pressable>
-							) : (
-								<Pressable
-									onPress={handleDeleteImg}
-									style={[
-										styles.addBtnWrapper,
-										userPhoto && styles.addBtnWrapperGray,
-									]}
-								>
-									<AntDesign name="close" size={18} color="#E8E8E8" />
-								</Pressable>
-							)}
+				<FlatList
+					data={userPosts}
+					renderItem={renderItem}
+					keyExtractor={item => item.image}
+					ListHeaderComponent={headerList}
+					ListEmptyComponent={
+						<View style={styles.listEmptyComponent}>
+							<Text style={styles.emptyText}>У вас ще немає публікацій</Text>
 						</View>
-						<Pressable onPress={() => logOut()} style={styles.btnLogOut}>
-							<Feather name="log-out" size={24} color="#BDBDBD" />
-						</Pressable>
-						<Text style={styles.userName}>{!userName ? 'Name' : userName}</Text>
-
-						<View style={styles.container}>
-							<FlatList
-								data={userPosts}
-								renderItem={({ item }) => (
-									<View style={styles.item}>
-										<View style={styles.imageContainer}>
-											<Image
-												source={{ uri: item.image }}
-												style={styles.postImg}
-											/>
-										</View>
-										<Text style={styles.postName}>{item.name}</Text>
-										<View style={styles.postInformationContainer}>
-											<View style={styles.containerBtn}>
-												<Pressable
-													style={styles.commentsBtn}
-													onPress={() =>
-														navigation.navigate('CommentsScreen', {
-															comments: item.comments,
-															img: item.image,
-														})
-													}
-												>
-													<Feather
-														name="message-circle"
-														size={24}
-														style={[
-															styles.commentsIcon,
-															item.comments.length === 0 &&
-																styles.inactiveColor,
-														]}
-													/>
-													<Text
-														style={[
-															styles.commentsSum,
-															item.comments.length === 0 &&
-																styles.inactiveColor,
-														]}
-													>
-														{item.comments.length}
-													</Text>
-												</Pressable>
-
-												<Pressable
-													style={styles.commentsBtn}
-													onPress={() => console.log('like')}
-												>
-													<Feather
-														name="thumbs-up"
-														size={24}
-														style={[
-															styles.commentsIcon,
-															item.likes === 0 && styles.inactiveColor,
-														]}
-													/>
-													<Text
-														style={[
-															styles.commentsSum,
-															item.likes === 0 && styles.inactiveColor,
-														]}
-													>
-														{item.comments.length}
-													</Text>
-												</Pressable>
-											</View>
-											<Pressable
-												style={styles.commentsBtn}
-												onPress={() => {
-													if (typeof item.location.coords === 'object') {
-														navigation.navigate('MapScreen', {
-															coords: item.location.coords,
-															name: item.name,
-														});
-													} else {
-														alert('No information');
-													}
-												}}
-											>
-												<Feather
-													name="map-pin"
-													size={24}
-													style={styles.inactiveColor}
-												/>
-												<Text style={styles.location}>
-													{item.location.title}
-												</Text>
-											</Pressable>
-										</View>
-									</View>
-								)}
-							/>
-						</View>
-					</View>
-				</SafeAreaView>
+					}
+				/>
 			</ImageBackground>
 		</View>
 	);
@@ -196,19 +96,35 @@ const styles = StyleSheet.create({
 	},
 	backgroundImg: {
 		flex: 1,
+		paddingTop: 40,
 	},
-	inner: {
-		flex: 1,
-		marginTop: 147,
+	listEmptyComponent: {
+		backgroundColor: '#FFFFFF',
+		width: '100%',
+		height: Dimensions.get('window').height - 327,
+		alignItems: 'center',
+		justifyContent: 'center',
+	},
+	emptyText: {
+		fontFamily: 'Roboto-Medium',
+		fontSize: 20,
+	},
+	listHeaderTop: {
+		height: 147,
+		with: '100%',
+		backgroundColor: 'transparent',
+	},
+	listHeaderBottom: {
+		paddingTop: 60,
+		with: '100%',
 		borderTopLeftRadius: 25,
 		borderTopRightRadius: 25,
-		paddingHorizontal: 16,
-		paddingTop: 92,
 		backgroundColor: '#FFFFFF',
 	},
 	imgBox: {
 		position: 'absolute',
-		top: -60,
+		zIndex: 1,
+		top: 87,
 		width: 120,
 		height: 120,
 		borderRadius: 16,
@@ -248,9 +164,10 @@ const styles = StyleSheet.create({
 		fontSize: 30,
 		letterSpacing: 0.3,
 	},
-
 	item: {
-		marginBottom: 32,
+		paddingHorizontal: 16,
+		paddingBottom: 32,
+		backgroundColor: '#FFFFFF',
 	},
 	imageContainer: {
 		marginBottom: 8,
@@ -282,6 +199,11 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		gap: 5,
 	},
+	locationBtn: {
+		flexDirection: 'row',
+		gap: 5,
+		maxWidth: 150,
+	},
 	commentsIcon: {
 		color: '#FF6C00',
 	},
@@ -306,3 +228,132 @@ const styles = StyleSheet.create({
 });
 
 export default ProfileScreen;
+
+const Item = ({ item, navigation }) => (
+	<View style={styles.item}>
+		<View style={styles.imageContainer}>
+			<Image source={{ uri: item.image }} style={styles.postImg} />
+		</View>
+		{item.name && <Text style={styles.postName}>{item.name}</Text>}
+		<View style={styles.postInformationContainer}>
+			<View style={styles.containerBtn}>
+				<Pressable
+					style={styles.commentsBtn}
+					onPress={() =>
+						navigation.navigate('CommentsScreen', {
+							comments: item.comments,
+							img: item.image,
+						})
+					}
+				>
+					<Feather
+						name="message-circle"
+						size={24}
+						style={[
+							styles.commentsIcon,
+							item.comments.length === 0 && styles.inactiveColor,
+						]}
+					/>
+					<Text
+						style={[
+							styles.commentsSum,
+							item.comments.length === 0 && styles.inactiveColor,
+						]}
+					>
+						{item.comments.length}
+					</Text>
+				</Pressable>
+
+				<Pressable
+					style={styles.commentsBtn}
+					onPress={() => console.log('like')}
+				>
+					<Feather
+						name="thumbs-up"
+						size={24}
+						style={[
+							styles.commentsIcon,
+							item.likes === 0 && styles.inactiveColor,
+						]}
+					/>
+					<Text
+						style={[
+							styles.commentsSum,
+							item.likes === 0 && styles.inactiveColor,
+						]}
+					>
+						{item.comments.length}
+					</Text>
+				</Pressable>
+			</View>
+			<Pressable
+				style={styles.locationBtn}
+				onPress={() => {
+					if (typeof item.location.coords === 'object') {
+						navigation.navigate('MapScreen', {
+							coords: item.location.coords,
+							name: item.name,
+						});
+					} else {
+						alert('No information');
+					}
+				}}
+			>
+				<Feather name="map-pin" size={24} style={styles.inactiveColor} />
+				<Text numberOfLines={1} style={styles.location}>
+					{item.location.title}
+				</Text>
+			</Pressable>
+		</View>
+	</View>
+);
+
+const User = ({
+	userPhoto,
+	userName,
+	logOut,
+	cameraOn,
+	cameraTurnOn,
+	handleDeleteImg,
+	takePicture,
+	cameraRef,
+	type,
+}) => (
+	<>
+		<View>
+			<View style={styles.imgBox}>
+				{cameraOn && !userPhoto && (
+					<Camera type={type} ref={cameraRef} style={styles.camera} />
+				)}
+				{userPhoto && (
+					<Image source={{ uri: userPhoto }} style={styles.userPhoto} />
+				)}
+				{!userPhoto ? (
+					<Pressable
+						onPress={!cameraOn ? cameraTurnOn : takePicture}
+						style={styles.addBtnWrapper}
+					>
+						<AntDesign name="plus" size={18} color="#FF6C00" />
+					</Pressable>
+				) : (
+					<Pressable
+						onPress={handleDeleteImg}
+						style={[
+							styles.addBtnWrapper,
+							userPhoto && styles.addBtnWrapperGray,
+						]}
+					>
+						<AntDesign name="close" size={18} color="#E8E8E8" />
+					</Pressable>
+				)}
+			</View>
+			<View style={styles.listHeaderTop}></View>
+			<View style={styles.listHeaderBottom}>
+				<Pressable onPress={() => logOut()} style={styles.btnLogOut}>
+					<Feather name="log-out" size={24} color="#BDBDBD" />
+				</Pressable>
+				<Text style={styles.userName}>{!userName ? 'Name' : userName}</Text>
+			</View>
+		</View>
+	</>
+);

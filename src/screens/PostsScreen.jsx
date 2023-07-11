@@ -95,6 +95,11 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		gap: 5,
 	},
+	locationBtn: {
+		flexDirection: 'row',
+		gap: 5,
+		maxWidth: 200,
+	},
 	commentsIcon: {
 		color: '#FF6C00',
 	},
@@ -150,7 +155,7 @@ const Item = ({ item, navigation }) => (
 				</Text>
 			</Pressable>
 			<Pressable
-				style={styles.commentsBtn}
+				style={styles.locationBtn}
 				onPress={() => {
 					if (typeof item.location.coords === 'object') {
 						navigation.navigate('MapScreen', {
@@ -163,7 +168,9 @@ const Item = ({ item, navigation }) => (
 				}}
 			>
 				<Feather name="map-pin" size={24} style={styles.inactiveColor} />
-				<Text style={styles.location}>{item.location.title}</Text>
+				<Text numberOfLines={1} style={styles.location}>
+					{item.location.title}
+				</Text>
 			</Pressable>
 		</View>
 	</View>

@@ -11,9 +11,9 @@ export const UserProvider = ({ children }) => {
 	const [userPhoto, setUserPhoto] = useState(null);
 	const [userPosts, setUserPosts] = useState([]);
 
-	const logIn = name => {
+	const logIn = email => {
 		setIsLoggedIn(true);
-		setUserName(name);
+		setUserEmail(email);
 	};
 	const signUp = (name, email) => {
 		setIsLoggedIn(true);
