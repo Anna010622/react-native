@@ -1,18 +1,25 @@
-import { Image, Pressable } from 'react-native';
-import { StyleSheet, Text, View, TextInput } from 'react-native';
-import { MaterialIcons, Feather } from '@expo/vector-icons';
-import { useEffect, useState, useRef } from 'react';
-import { Button } from '../components/Button';
-import { Camera } from 'expo-camera';
 import * as Location from 'expo-location';
-import { useUser } from '../hooks/userContext';
+import { Camera } from 'expo-camera';
+import { MaterialIcons, Feather } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
+import { useEffect, useState, useRef } from 'react';
+import {
+	Image,
+	Pressable,
+	StyleSheet,
+	Text,
+	View,
+	TextInput,
+	ActivityIndicator,
+} from 'react-native';
+import { Button } from '../components/Button';
+import { useUser } from '../hooks/userContext';
 
 const CreatePostsScreen = ({ navigation }) => {
 	const [location, setLocation] = useState('');
 	const [image, setImage] = useState(null);
 	const [name, setName] = useState('');
-
+	const [isLoading, setIsLoading] = useState(false);
 	const [hasPermission, setHasPermission] = useState(null);
 	const [hasLocationPermission, setHasLocationPermission] = useState(null);
 	const [type, setType] = useState(Camera.Constants.Type.back);
@@ -37,12 +44,14 @@ const CreatePostsScreen = ({ navigation }) => {
 
 	const takePicture = async () => {
 		if (cameraRef) {
+			setIsLoading(true);
 			try {
 				const data = await cameraRef.current.takePictureAsync();
 				setImage(data.uri);
 			} catch (error) {
 				console.log(error);
 			}
+			setIsLoading(false);
 		}
 	};
 
@@ -99,16 +108,20 @@ const CreatePostsScreen = ({ navigation }) => {
 	return (
 		<View style={styles.container}>
 			<View style={styles.imgContainer}>
-				<Pressable
-					style={[styles.cameraBtn, image && styles.opacity]}
-					onPress={!image ? takePicture : editPicture}
-				>
-					<MaterialIcons
-						name="camera-alt"
-						size={24}
-						color={!image ? '#BDBDBD' : '#FFFFFF'}
-					/>
-				</Pressable>
+				{isLoading ? (
+					<ActivityIndicator style={styles.loader} size="large" />
+				) : (
+					<Pressable
+						style={[styles.cameraBtn, image && styles.opacity]}
+						onPress={!image ? takePicture : editPicture}
+					>
+						<MaterialIcons
+							name="camera-alt"
+							size={24}
+							color={!image ? '#BDBDBD' : '#FFFFFF'}
+						/>
+					</Pressable>
+				)}
 
 				{image ? (
 					<Image source={{ uri: image }} style={styles.camera} />
@@ -269,5 +282,10 @@ const styles = StyleSheet.create({
 		fontFamily: 'Roboto-Medium',
 		fontSize: 17,
 		letterSpacing: 0.3,
+	},
+	loader: {
+		position: 'absolute',
+		zIndex: 1,
+		alignSelf: 'center',
 	},
 });

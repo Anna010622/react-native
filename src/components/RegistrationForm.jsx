@@ -6,6 +6,7 @@ import {
 	Pressable,
 	Keyboard,
 	Image,
+	ActivityIndicator,
 } from 'react-native';
 import { Button } from './Button';
 import { useEffect, useRef, useState } from 'react';
@@ -44,6 +45,7 @@ export const RegistrationForm = ({ navigation }) => {
 	const [cameraOn, setCameraOn] = useState(false);
 	const [type, setType] = useState(Camera.Constants.Type.back);
 	const [image, setImage] = useState(null);
+	const [isLoading, setIsLoading] = useState(false);
 
 	const { signUp, addUserPhoto } = useUser();
 
@@ -68,6 +70,7 @@ export const RegistrationForm = ({ navigation }) => {
 	}, []);
 
 	const takePicture = async () => {
+		setIsLoading(true);
 		if (cameraRef) {
 			try {
 				const data = await cameraRef.current.takePictureAsync();
@@ -76,6 +79,7 @@ export const RegistrationForm = ({ navigation }) => {
 			} catch (error) {
 				console.log(error);
 			}
+			setIsLoading(false);
 		}
 	};
 	const cameraTurnOn = () => {
@@ -107,11 +111,13 @@ export const RegistrationForm = ({ navigation }) => {
 							<Camera type={type} ref={cameraRef} style={styles.camera} />
 						)}
 						{image && <Image source={{ uri: image }} style={styles.camera} />}
+						{isLoading && <ActivityIndicator style={styles.loader} />}
 
 						{!image ? (
 							<Pressable
 								onPress={!cameraOn ? cameraTurnOn : takePicture}
 								style={styles.addBtnWrapper}
+								disabled={isLoading}
 							>
 								<AntDesign name="plus" size={18} color="#FF6C00" />
 							</Pressable>
@@ -237,6 +243,7 @@ const styles = StyleSheet.create({
 		borderRadius: 16,
 		alignSelf: 'center',
 		backgroundColor: '#F6F6F6',
+		justifyContent: 'center',
 	},
 	addBtnWrapper: {
 		position: 'absolute',
@@ -309,5 +316,9 @@ const styles = StyleSheet.create({
 	camera: {
 		flex: 1,
 		borderRadius: 16,
+	},
+	loader: {
+		position: 'absolute',
+		alignSelf: 'center',
 	},
 });

@@ -1,13 +1,13 @@
 import {
 	StyleSheet,
 	ImageBackground,
-	SafeAreaView,
 	Text,
 	View,
 	Image,
 	Pressable,
 	FlatList,
 	Dimensions,
+	ActivityIndicator,
 } from 'react-native';
 import { useUser } from '../hooks/userContext';
 import { AntDesign, Feather } from '@expo/vector-icons';
@@ -15,57 +15,14 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Camera } from 'expo-camera';
 
 const ProfileScreen = ({ navigation }) => {
-	const [hasPermission, setHasPermission] = useState(null);
-	const cameraRef = useRef(null);
-	const [cameraOn, setCameraOn] = useState(false);
-	const [type, setType] = useState(Camera.Constants.Type.back);
-
-	const { userName, logOut, userPosts, userPhoto, addUserPhoto } = useUser();
-
-	useEffect(() => {
-		(async () => {
-			const cameraStatus = await Camera.requestCameraPermissionsAsync();
-			setHasPermission(cameraStatus.status === 'granted');
-		})();
-	}, []);
+	const { userPosts } = useUser();
 
 	const renderItem = useCallback(
 		({ item }) => <Item item={item} navigation={navigation} />,
 		[]
 	);
 
-	const headerList = () => (
-		<User
-			userName={userName}
-			userPhoto={userPhoto}
-			logOut={logOut}
-			cameraOn={cameraOn}
-			cameraTurnOn={cameraTurnOn}
-			handleDeleteImg={handleDeleteImg}
-			takePicture={takePicture}
-			cameraRef={cameraRef}
-			type={type}
-		/>
-	);
-
-	const takePicture = async () => {
-		if (cameraRef) {
-			try {
-				const data = await cameraRef.current.takePictureAsync();
-				addUserPhoto(data.uri);
-			} catch (error) {
-				console.log(error);
-			}
-		}
-	};
-	const cameraTurnOn = () => {
-		setCameraOn(true);
-	};
-
-	handleDeleteImg = () => {
-		addUserPhoto(null);
-		setCameraOn(false);
-	};
+	const headerList = () => <User />;
 
 	return (
 		<View style={styles.container}>
@@ -130,6 +87,7 @@ const styles = StyleSheet.create({
 		borderRadius: 16,
 		alignSelf: 'center',
 		backgroundColor: '#F6F6F6',
+		justifyContent: 'center',
 	},
 	userPhoto: {
 		flex: 1,
@@ -225,6 +183,11 @@ const styles = StyleSheet.create({
 		flex: 1,
 		borderRadius: 16,
 	},
+	loader: {
+		position: 'absolute',
+		zIndex: 1,
+		alignSelf: 'center',
+	},
 });
 
 export default ProfileScreen;
@@ -308,52 +271,82 @@ const Item = ({ item, navigation }) => (
 	</View>
 );
 
-const User = ({
-	userPhoto,
-	userName,
-	logOut,
-	cameraOn,
-	cameraTurnOn,
-	handleDeleteImg,
-	takePicture,
-	cameraRef,
-	type,
-}) => (
-	<>
-		<View>
-			<View style={styles.imgBox}>
-				{cameraOn && !userPhoto && (
-					<Camera type={type} ref={cameraRef} style={styles.camera} />
-				)}
-				{userPhoto && (
-					<Image source={{ uri: userPhoto }} style={styles.userPhoto} />
-				)}
-				{!userPhoto ? (
-					<Pressable
-						onPress={!cameraOn ? cameraTurnOn : takePicture}
-						style={styles.addBtnWrapper}
-					>
-						<AntDesign name="plus" size={18} color="#FF6C00" />
+const User = () => {
+	const [hasPermission, setHasPermission] = useState(null);
+	const cameraRef = useRef(null);
+	const [cameraOn, setCameraOn] = useState(false);
+	const [type, setType] = useState(Camera.Constants.Type.back);
+	const [isLoading, setIsLoading] = useState(false);
+
+	const { userName, logOut, userPhoto, addUserPhoto } = useUser();
+
+	useEffect(() => {
+		(async () => {
+			const cameraStatus = await Camera.requestCameraPermissionsAsync();
+			setHasPermission(cameraStatus.status === 'granted');
+		})();
+	}, []);
+
+	const takePicture = async () => {
+		if (cameraRef) {
+			setIsLoading(true);
+			try {
+				const data = await cameraRef.current.takePictureAsync();
+				addUserPhoto(data.uri);
+			} catch (error) {
+				console.log(error);
+			}
+			setIsLoading(false);
+		}
+	};
+	const cameraTurnOn = () => {
+		setCameraOn(true);
+	};
+
+	handleDeleteImg = () => {
+		addUserPhoto(null);
+		setCameraOn(false);
+	};
+
+	return (
+		<>
+			<View>
+				<View style={styles.imgBox}>
+					{isLoading && <ActivityIndicator style={styles.loader} />}
+					{cameraOn && !userPhoto && (
+						<Camera type={type} ref={cameraRef} style={styles.camera} />
+					)}
+					{userPhoto && (
+						<Image source={{ uri: userPhoto }} style={styles.userPhoto} />
+					)}
+					{!userPhoto ? (
+						<Pressable
+							onPress={!cameraOn ? cameraTurnOn : takePicture}
+							style={styles.addBtnWrapper}
+							disabled={isLoading}
+						>
+							<AntDesign name="plus" size={18} color="#FF6C00" />
+						</Pressable>
+					) : (
+						<Pressable
+							onPress={handleDeleteImg}
+							style={[
+								styles.addBtnWrapper,
+								userPhoto && styles.addBtnWrapperGray,
+							]}
+						>
+							<AntDesign name="close" size={18} color="#E8E8E8" />
+						</Pressable>
+					)}
+				</View>
+				<View style={styles.listHeaderTop}></View>
+				<View style={styles.listHeaderBottom}>
+					<Pressable onPress={() => logOut()} style={styles.btnLogOut}>
+						<Feather name="log-out" size={24} color="#BDBDBD" />
 					</Pressable>
-				) : (
-					<Pressable
-						onPress={handleDeleteImg}
-						style={[
-							styles.addBtnWrapper,
-							userPhoto && styles.addBtnWrapperGray,
-						]}
-					>
-						<AntDesign name="close" size={18} color="#E8E8E8" />
-					</Pressable>
-				)}
+					<Text style={styles.userName}>{!userName ? 'Name' : userName}</Text>
+				</View>
 			</View>
-			<View style={styles.listHeaderTop}></View>
-			<View style={styles.listHeaderBottom}>
-				<Pressable onPress={() => logOut()} style={styles.btnLogOut}>
-					<Feather name="log-out" size={24} color="#BDBDBD" />
-				</Pressable>
-				<Text style={styles.userName}>{!userName ? 'Name' : userName}</Text>
-			</View>
-		</View>
-	</>
-);
+		</>
+	);
+};
