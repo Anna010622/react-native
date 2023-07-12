@@ -11,6 +11,8 @@ import {
 	View,
 	TextInput,
 	ActivityIndicator,
+	Keyboard,
+	TouchableWithoutFeedback,
 } from 'react-native';
 import { Button } from '../components/Button';
 import { useUser } from '../hooks/userContext';
@@ -106,84 +108,86 @@ const CreatePostsScreen = ({ navigation }) => {
 	}
 
 	return (
-		<View style={styles.container}>
-			<View style={styles.imgContainer}>
-				{isLoading ? (
-					<ActivityIndicator style={styles.loader} size="large" />
-				) : (
-					<Pressable
-						style={[styles.cameraBtn, image && styles.opacity]}
-						onPress={!image ? takePicture : editPicture}
-					>
-						<MaterialIcons
-							name="camera-alt"
-							size={24}
-							color={!image ? '#BDBDBD' : '#FFFFFF'}
-						/>
-					</Pressable>
-				)}
+		<TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+			<View style={styles.container}>
+				<View style={styles.imgContainer}>
+					{isLoading ? (
+						<ActivityIndicator style={styles.loader} size="large" />
+					) : (
+						<Pressable
+							style={[styles.cameraBtn, image && styles.opacity]}
+							onPress={!image ? takePicture : editPicture}
+						>
+							<MaterialIcons
+								name="camera-alt"
+								size={24}
+								color={!image ? '#BDBDBD' : '#FFFFFF'}
+							/>
+						</Pressable>
+					)}
 
-				{image ? (
-					<Image source={{ uri: image }} style={styles.camera} />
-				) : (
-					<Camera type={type} ref={cameraRef} style={styles.camera} />
-				)}
-			</View>
-			<Text style={styles.text}>
-				{!image ? 'Завантажте фото' : 'Редагувати фото'}
-			</Text>
-			<TextInput
-				placeholder="Назва"
-				returnKeyType="next"
-				onSubmitEditing={() => {
-					secondTextInput.focus();
-				}}
-				blurOnSubmit={false}
-				placeholderTextColor="#BDBDBD"
-				value={name}
-				onChangeText={setName}
-				style={[styles.input, !name && styles.textPlaceholder]}
-			/>
-			<View style={styles.inputField}>
-				<Feather name="map-pin" size={24} style={styles.inputIcon} />
+					{image ? (
+						<Image source={{ uri: image }} style={styles.camera} />
+					) : (
+						<Camera type={type} ref={cameraRef} style={styles.camera} />
+					)}
+				</View>
+				<Text style={styles.text}>
+					{!image ? 'Завантажте фото' : 'Редагувати фото'}
+				</Text>
 				<TextInput
-					placeholder="Місцевість..."
-					ref={input => {
-						secondTextInput = input;
+					placeholder="Назва"
+					returnKeyType="next"
+					onSubmitEditing={() => {
+						secondTextInput.focus();
 					}}
+					blurOnSubmit={false}
 					placeholderTextColor="#BDBDBD"
-					value={location}
-					onChangeText={setLocation}
-					style={[
-						styles.input,
-						!location && styles.textPlaceholder,
-						styles.inputTextWithIconLeft,
-					]}
+					value={name}
+					onChangeText={setName}
+					style={[styles.input, !name && styles.textPlaceholder]}
 				/>
+				<View style={styles.inputField}>
+					<Feather name="map-pin" size={24} style={styles.inputIcon} />
+					<TextInput
+						placeholder="Місцевість..."
+						ref={input => {
+							secondTextInput = input;
+						}}
+						placeholderTextColor="#BDBDBD"
+						value={location}
+						onChangeText={setLocation}
+						style={[
+							styles.input,
+							!location && styles.textPlaceholder,
+							styles.inputTextWithIconLeft,
+						]}
+					/>
+				</View>
+				<Button
+					text="Опубліковати"
+					onPressFunction={handlePublish}
+					disabled={!image && true}
+				/>
+				<Pressable
+					style={[
+						styles.btnDelete,
+						!image && !name && !location && styles.btnDeleteDisable,
+					]}
+					onPress={reset}
+					disabled={!image && !name && !location && true}
+				>
+					<Feather
+						name="trash-2"
+						size={24}
+						style={[
+							styles.iconDeleteActive,
+							!image && !name && !location && styles.iconDeleteDisable,
+						]}
+					/>
+				</Pressable>
 			</View>
-			<Button
-				text="Опубліковати"
-				onPressFunction={handlePublish}
-				disabled={!image && true}
-			/>
-			<Pressable
-				style={[
-					styles.btnDelete,
-					!image && !name && !location && styles.btnDeleteDisable,
-				]}
-				onPress={reset}
-				disabled={!image && !name && !location && true}
-			>
-				<Feather
-					name="trash-2"
-					size={24}
-					style={[
-						styles.iconDeleteActive,
-						!image && !name && !location && styles.iconDeleteDisable,
-					]}
-				/>
-			</Pressable>
-		</View>
+		</TouchableWithoutFeedback>
 	);
 };
 
