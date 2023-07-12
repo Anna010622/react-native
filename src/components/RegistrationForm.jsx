@@ -62,13 +62,6 @@ export const RegistrationForm = ({ navigation }) => {
 		};
 	}, []);
 
-	useEffect(() => {
-		(async () => {
-			const cameraStatus = await Camera.requestCameraPermissionsAsync();
-			setHasPermission(cameraStatus.status === 'granted');
-		})();
-	}, []);
-
 	const takePicture = async () => {
 		setIsLoading(true);
 		if (cameraRef) {
@@ -82,7 +75,11 @@ export const RegistrationForm = ({ navigation }) => {
 			setIsLoading(false);
 		}
 	};
-	const cameraTurnOn = () => {
+	const cameraTurnOn = async () => {
+		if (!hasPermission) {
+			const cameraStatus = await Camera.requestCameraPermissionsAsync();
+			setHasPermission(cameraStatus.status === 'granted');
+		}
 		setCameraOn(true);
 	};
 

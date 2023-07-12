@@ -60,11 +60,7 @@ const BottomTabNavigator = ({ navigation }) => {
 							onPress={() => navigation.navigate('PostsScreen')}
 							style={styles.btnBack}
 						>
-							<Feather
-								name="arrow-left"
-								size={24}
-								color="rgba(33, 33, 33, 0.8)"
-							/>
+							<Feather name="arrow-left" size={24} style={styles.iconBtnBack} />
 						</Pressable>
 					),
 				}}
@@ -81,8 +77,6 @@ const styles = StyleSheet.create({
 		height: 58,
 		paddingHorizontal: 81,
 		backgroundColor: '#FFFFFF',
-		boxShadow: '0px -0.5px 0px 0px rgba(0, 0, 0, 0.30)',
-		backdropFilter: 'blur(13.591408729553223)',
 	},
 	tabBarItemStyle: {
 		alignSelf: 'center',
@@ -99,6 +93,10 @@ const styles = StyleSheet.create({
 	},
 	btnBack: {
 		paddingLeft: 16,
+	},
+	iconBtnBack: {
+		color: '#212121',
+		opacity: 0.8,
 	},
 	btnLogOut: {
 		paddingHorizontal: 10,
