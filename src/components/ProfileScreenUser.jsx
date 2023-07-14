@@ -8,8 +8,9 @@ import {
 } from 'react-native';
 import { useUser } from '../hooks/userContext';
 import { AntDesign, Feather } from '@expo/vector-icons';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { Camera } from 'expo-camera';
+import { auth } from '../../config';
 
 const User = () => {
 	const [hasPermission, setHasPermission] = useState(null);
@@ -18,7 +19,11 @@ const User = () => {
 	const [type, setType] = useState(Camera.Constants.Type.back);
 	const [isLoading, setIsLoading] = useState(false);
 
-	const { userName, logOut, userPhoto, addUserPhoto } = useUser();
+	const { userName, userPhoto, addUserPhoto } = useUser();
+
+	const handleLogOut = () => {
+		auth.signOut();
+	};
 
 	const takePicture = async () => {
 		if (cameraRef) {
@@ -78,7 +83,7 @@ const User = () => {
 				</View>
 				<View style={styles.listHeaderTop}></View>
 				<View style={styles.listHeaderBottom}>
-					<Pressable onPress={() => logOut()} style={styles.btnLogOut}>
+					<Pressable onPress={handleLogOut} style={styles.btnLogOut}>
 						<Feather name="log-out" size={24} color="#BDBDBD" />
 					</Pressable>
 					<Text style={styles.userName}>{!userName ? 'Name' : userName}</Text>

@@ -4,12 +4,14 @@ import PostsScreen from '../screens/PostsScreen';
 import CreatePostsScreen from '../screens/CreatePostsScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import { Feather } from '@expo/vector-icons';
-import { useUser } from '../hooks/userContext';
+import { auth } from '../../config';
 
 const Tabs = createBottomTabNavigator();
 
 const BottomTabNavigator = ({ navigation }) => {
-	const { logOut } = useUser();
+	const handleLogOut = () => {
+		auth.signOut();
+	};
 
 	return (
 		<Tabs.Navigator
@@ -43,7 +45,7 @@ const BottomTabNavigator = ({ navigation }) => {
 				options={{
 					title: 'Публікації',
 					headerRight: () => (
-						<Pressable onPress={() => logOut()} style={styles.btnLogOut}>
+						<Pressable onPress={handleLogOut} style={styles.btnLogOut}>
 							<Feather name="log-out" size={24} color="#BDBDBD" />
 						</Pressable>
 					),

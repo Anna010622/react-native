@@ -7,6 +7,7 @@ import {
 	Keyboard,
 	Image,
 	ActivityIndicator,
+	Alert,
 } from 'react-native';
 import { Button } from './Button';
 import { useEffect, useRef, useState } from 'react';
@@ -15,6 +16,9 @@ import { Formik } from 'formik';
 import * as yup from 'yup';
 import { useUser } from '../hooks/userContext';
 import { Camera } from 'expo-camera';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth, db } from '../../config';
+import { setDoc, doc } from 'firebase/firestore';
 
 const schema = yup
 	.object({
@@ -28,7 +32,7 @@ const schema = yup
 			.required('Заповніть це поле'),
 		password: yup
 			.string()
-			.min(5, 'Пароль має бути не менше ніж 5 символів')
+			.min(6, 'Пароль має бути не менше ніж 6 символів')
 			.max(10, 'Пароль має бути не більше ніж 10 символів')
 			.required('Заповніть це поле'),
 	})
@@ -47,7 +51,26 @@ export const RegistrationForm = ({ navigation }) => {
 	const [image, setImage] = useState(null);
 	const [isLoading, setIsLoading] = useState(false);
 
-	const { signUp, addUserPhoto } = useUser();
+	const { addUserPhoto } = useUser();
+
+	const registerDB = async ({ email, password, login }) => {
+		try {
+			await createUserWithEmailAndPassword(auth, email, password);
+			console.log('auth', auth);
+			if (auth.currentUser.uid) {
+				await setDoc(doc(db, 'users', auth.currentUser.uid), {
+					login,
+					email,
+				});
+			}
+		} catch (error) {
+			if (error.code === 'auth/email-already-in-use') {
+				return Alert.alert('Такий користувач вже зареєстрований');
+			} else Alert.alert('Сталася помилка, спробуйте пізніше');
+			console.log('error:', error);
+			throw error;
+		}
+	};
 
 	useEffect(() => {
 		const addPadding = Keyboard.addListener('keyboardDidShow', () => {
@@ -91,7 +114,7 @@ export const RegistrationForm = ({ navigation }) => {
 	const initialValues = { login: '', email: '', password: '' };
 	const onSubmit = (values, { resetForm }) => {
 		console.log(values);
-		signUp(values.login, values.email);
+		registerDB(values);
 		resetForm({ values: initialValues });
 	};
 

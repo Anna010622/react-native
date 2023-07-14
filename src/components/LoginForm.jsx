@@ -1,9 +1,17 @@
-import { StyleSheet, Text, View, TextInput, Keyboard } from 'react-native';
+import {
+	StyleSheet,
+	Text,
+	View,
+	TextInput,
+	Keyboard,
+	Alert,
+} from 'react-native';
 import { Button } from './Button';
 import { useEffect, useState } from 'react';
 import { Formik } from 'formik';
 import * as yup from 'yup';
-import { useUser } from '../hooks/userContext';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../../config';
 
 const schema = yup
 	.object({
@@ -13,7 +21,7 @@ const schema = yup
 			.required('Заповніть це поле'),
 		password: yup
 			.string()
-			.min(5, 'Пароль має бути не менше ніж 5 символів')
+			.min(6, 'Пароль має бути не менше ніж 6 символів')
 			.max(10, 'Пароль має бути не більше ніж 10 символів')
 			.required('Заповніть це поле'),
 	})
@@ -24,8 +32,6 @@ export const LoginForm = ({ navigation }) => {
 	const [isPasswordFocus, setIsPasswordFocus] = useState(false);
 	const [isEmailFocus, setIsEmailFocus] = useState(false);
 	const [isShowKeyboard, setIsShowKeyboard] = useState(false);
-
-	const { logIn } = useUser();
 
 	useEffect(() => {
 		const addPadding = Keyboard.addListener('keyboardDidShow', () => {
@@ -40,10 +46,28 @@ export const LoginForm = ({ navigation }) => {
 		};
 	}, []);
 
+	const loginDB = async ({ email, password }) => {
+		try {
+			const credentials = await signInWithEmailAndPassword(
+				auth,
+				email,
+				password
+			);
+			return credentials.user;
+		} catch (error) {
+			console.log(error);
+			if (error.code === 'auth/user-not-found') {
+				return Alert.alert('Такого користувача не знайдено');
+			} else if (error.code === 'auth/wrong-password') {
+				return Alert.alert('Неправильний прароль');
+			}
+		}
+	};
+
 	const initialValues = { email: '', password: '' };
 	const onSubmit = (values, { resetForm }) => {
+		loginDB(values);
 		console.log(values);
-		logIn(values.email);
 		resetForm({ values: initialValues });
 	};
 
