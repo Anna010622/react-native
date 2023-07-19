@@ -14,11 +14,14 @@ import { useEffect, useRef, useState } from 'react';
 import { AntDesign } from '@expo/vector-icons';
 import { Formik } from 'formik';
 import * as yup from 'yup';
-import { useUser } from '../hooks/userContext';
 import { Camera } from 'expo-camera';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth, db } from '../../config';
+import { auth, db, storage } from '../../config';
 import { setDoc, doc } from 'firebase/firestore';
+import { updateProfile } from 'firebase/auth';
+import { useDispatch } from 'react-redux';
+import { logIn, setLoading } from '../redux/userSlice';
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 
 const schema = yup
 	.object({
@@ -50,24 +53,36 @@ export const RegistrationForm = ({ navigation }) => {
 	const [type, setType] = useState(Camera.Constants.Type.back);
 	const [image, setImage] = useState(null);
 	const [isLoading, setIsLoading] = useState(false);
-
-	const { addUserPhoto } = useUser();
+	const dispatch = useDispatch();
 
 	const registerDB = async ({ email, password, login }) => {
+		dispatch(setLoading(true));
 		try {
 			await createUserWithEmailAndPassword(auth, email, password);
-			console.log('auth', auth);
-			if (auth.currentUser.uid) {
+
+			if (auth.currentUser.uid && image) {
+				await uploadImage(image, login);
+			} else if (auth.currentUser.uid) {
 				await setDoc(doc(db, 'users', auth.currentUser.uid), {
 					login,
 					email,
 				});
+				await updateProfile(auth.currentUser, {
+					displayName: login,
+				});
+				dispatch(
+					logIn({
+						name: auth.currentUser.displayName,
+						email: auth.currentUser.email,
+					})
+				);
 			}
+			dispatch(setLoading(false));
 		} catch (error) {
+			dispatch(setLoading(false));
 			if (error.code === 'auth/email-already-in-use') {
 				return Alert.alert('Такий користувач вже зареєстрований');
-			} else Alert.alert('Сталася помилка, спробуйте пізніше');
-			console.log('error:', error);
+			} else console.log('error:', error);
 			throw error;
 		}
 	};
@@ -91,11 +106,65 @@ export const RegistrationForm = ({ navigation }) => {
 			try {
 				const data = await cameraRef.current.takePictureAsync();
 				setImage(data.uri);
-				addUserPhoto(data.uri);
 			} catch (error) {
 				console.log(error);
 			}
 			setIsLoading(false);
+		}
+	};
+
+	const uploadImage = async (uri, login) => {
+		const response = await fetch(uri);
+		const blob = await response.blob();
+		const id = blob._data.name;
+		const storageRef = ref(storage, `images/${auth.currentUser.uid}/avatar`);
+		const uploadTask = uploadBytesResumable(storageRef, blob);
+
+		uploadTask.on(
+			'state_changed',
+			snapshot => {
+				const progress =
+					(snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+			},
+			error => {
+				switch (error.code) {
+					case 'storage/unauthorized':
+						console.log("User doesn't have permission to access the object");
+						break;
+					case 'storage/canceled':
+						console.log('User canceled the upload');
+						break;
+					case 'storage/unknown':
+						console.log('Unknown error occurred, inspect error.serverResponse');
+						break;
+				}
+			},
+			async () => {
+				const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+				updateUserProfile(downloadURL, login);
+			}
+		);
+	};
+
+	const updateUserProfile = async (downloadURL, login) => {
+		await updateProfile(auth.currentUser, {
+			photoURL: downloadURL,
+			displayName: login,
+		});
+		if (auth.currentUser.photoURL) {
+			dispatch(
+				logIn({
+					name: auth.currentUser.displayName,
+					email: auth.currentUser.email,
+					userAvatar: auth.currentUser.photoURL,
+				})
+			);
+
+			await setDoc(doc(db, 'users', auth.currentUser.uid), {
+				login,
+				email: auth.currentUser.email,
+				userAvatar: auth.currentUser.photoURL,
+			});
 		}
 	};
 	const cameraTurnOn = async () => {
@@ -112,8 +181,8 @@ export const RegistrationForm = ({ navigation }) => {
 	};
 
 	const initialValues = { login: '', email: '', password: '' };
+
 	const onSubmit = (values, { resetForm }) => {
-		console.log(values);
 		registerDB(values);
 		resetForm({ values: initialValues });
 	};

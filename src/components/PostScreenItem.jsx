@@ -4,7 +4,7 @@ import { Feather } from '@expo/vector-icons';
 const Item = ({ item, navigation }) => (
 	<View style={styles.item}>
 		<View style={styles.imageContainer}>
-			<Image source={{ uri: item.image }} style={styles.postImg} />
+			<Image source={{ uri: item.imageUri }} style={styles.postImg} />
 		</View>
 		{item.name && <Text style={styles.postName}>{item.name}</Text>}
 		<View style={styles.postInformationContainer}>
@@ -12,8 +12,9 @@ const Item = ({ item, navigation }) => (
 				style={styles.commentsBtn}
 				onPress={() =>
 					navigation.navigate('CommentsScreen', {
-						comments: item.comments,
-						img: item.image,
+						img: item.imageUri,
+						postId: item.id,
+						postCreatedBy: item.createdBy,
 					})
 				}
 			>
@@ -40,7 +41,7 @@ const Item = ({ item, navigation }) => (
 					if (typeof item.location.coords === 'object') {
 						navigation.navigate('MapScreen', {
 							coords: item.location.coords,
-							name: item.name,
+							name: item.title,
 						});
 					} else {
 						alert('No information');

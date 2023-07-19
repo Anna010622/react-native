@@ -1,18 +1,24 @@
 import { StyleSheet, Text, View, Image } from 'react-native';
+import { useSelector } from 'react-redux';
+import { selectUser } from '../redux/selectors';
 
-const User = ({ userPhoto, userName, userEmail }) => (
-	<View style={styles.userWrapper}>
-		<View style={styles.userPhotoContainer}>
-			{userPhoto && (
-				<Image source={{ uri: userPhoto }} style={styles.userPhoto} />
-			)}
+const User = () => {
+	const user = useSelector(selectUser);
+
+	return (
+		<View style={styles.userWrapper}>
+			<View style={styles.userPhotoContainer}>
+				{user?.userAvatar && (
+					<Image source={{ uri: user?.userAvatar }} style={styles.userPhoto} />
+				)}
+			</View>
+			<View>
+				{user?.name && <Text style={styles.userName}>{user.name}</Text>}
+				{user?.email && <Text style={styles.userEmail}>{user.email}</Text>}
+			</View>
 		</View>
-		<View>
-			{userName && <Text style={styles.userName}>{userName}</Text>}
-			{userEmail && <Text style={styles.userEmail}>{userEmail}</Text>}
-		</View>
-	</View>
-);
+	);
+};
 
 const styles = StyleSheet.create({
 	userWrapper: {

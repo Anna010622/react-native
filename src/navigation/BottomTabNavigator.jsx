@@ -5,12 +5,17 @@ import CreatePostsScreen from '../screens/CreatePostsScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import { Feather } from '@expo/vector-icons';
 import { auth } from '../../config';
+import { useDispatch } from 'react-redux';
+import { logOut } from '../redux/userSlice';
 
 const Tabs = createBottomTabNavigator();
 
 const BottomTabNavigator = ({ navigation }) => {
+	const dispatch = useDispatch();
+
 	const handleLogOut = () => {
 		auth.signOut();
+		dispatch(logOut());
 	};
 
 	return (

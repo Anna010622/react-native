@@ -12,6 +12,8 @@ import { Formik } from 'formik';
 import * as yup from 'yup';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../config';
+import { useDispatch } from 'react-redux';
+import { logIn, setLoading } from '../redux/userSlice';
 
 const schema = yup
 	.object({
@@ -32,6 +34,7 @@ export const LoginForm = ({ navigation }) => {
 	const [isPasswordFocus, setIsPasswordFocus] = useState(false);
 	const [isEmailFocus, setIsEmailFocus] = useState(false);
 	const [isShowKeyboard, setIsShowKeyboard] = useState(false);
+	const dispatch = useDispatch();
 
 	useEffect(() => {
 		const addPadding = Keyboard.addListener('keyboardDidShow', () => {
@@ -47,14 +50,24 @@ export const LoginForm = ({ navigation }) => {
 	}, []);
 
 	const loginDB = async ({ email, password }) => {
+		dispatch(setLoading(true));
 		try {
 			const credentials = await signInWithEmailAndPassword(
 				auth,
 				email,
 				password
 			);
+			if (credentials.user) {
+				setCurrentUserToStore(
+					credentials.user.displayName,
+					credentials.user.email,
+					credentials.user.photoURL
+				);
+			}
+			dispatch(setLoading(false));
 			return credentials.user;
 		} catch (error) {
+			dispatch(setLoading(false));
 			console.log(error);
 			if (error.code === 'auth/user-not-found') {
 				return Alert.alert('Такого користувача не знайдено');
@@ -64,11 +77,23 @@ export const LoginForm = ({ navigation }) => {
 		}
 	};
 
+	const setCurrentUserToStore = async (name, email, userAvatar) => {
+		dispatch(
+			logIn({
+				name,
+				email,
+				userAvatar,
+			})
+		);
+	};
+
 	const initialValues = { email: '', password: '' };
-	const onSubmit = (values, { resetForm }) => {
-		loginDB(values);
-		console.log(values);
-		resetForm({ values: initialValues });
+
+	const onSubmit = async (values, { resetForm }) => {
+		const user = await loginDB(values);
+		if (user) {
+			resetForm({ values: initialValues });
+		}
 	};
 
 	return (

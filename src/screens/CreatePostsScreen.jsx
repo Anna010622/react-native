@@ -15,18 +15,19 @@ import {
 	TouchableWithoutFeedback,
 } from 'react-native';
 import { Button } from '../components/Button';
-import { useUser } from '../hooks/userContext';
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { collection, addDoc } from 'firebase/firestore';
+import { storage, auth, db } from '../../config';
 
 const CreatePostsScreen = ({ navigation }) => {
 	const [location, setLocation] = useState('');
-	const [image, setImage] = useState(null);
+	const [uri, setUri] = useState(null);
 	const [name, setName] = useState('');
 	const [isLoading, setIsLoading] = useState(false);
 	const [hasPermission, setHasPermission] = useState(null);
 	const [hasLocationPermission, setHasLocationPermission] = useState(null);
 	const [type, setType] = useState(Camera.Constants.Type.back);
 	const cameraRef = useRef(null);
-	const { addPost } = useUser();
 	const isFocused = useIsFocused();
 
 	useEffect(() => {
@@ -49,7 +50,7 @@ const CreatePostsScreen = ({ navigation }) => {
 			setIsLoading(true);
 			try {
 				const data = await cameraRef.current.takePictureAsync();
-				setImage(data.uri);
+				setUri(data.uri);
 			} catch (error) {
 				console.log(error);
 			}
@@ -57,44 +58,85 @@ const CreatePostsScreen = ({ navigation }) => {
 		}
 	};
 
-	const editPicture = () => setImage(null);
+	const editPicture = () => setUri(null);
 
-	const createPost = async () => {
+	const uploadImage = async () => {
+		setIsLoading(true);
+		const response = await fetch(uri);
+		const blob = await response.blob();
+		const id = blob._data.name;
+		const storageRef = ref(storage, `images/${auth.currentUser.uid}/posts/id`);
+		const uploadTask = uploadBytesResumable(storageRef, blob);
+
+		uploadTask.on(
+			'state_changed',
+			snapshot => {
+				const progress =
+					(snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+			},
+			error => {
+				switch (error.code) {
+					case 'storage/unauthorized':
+						console.log("User doesn't have permission to access the object");
+						break;
+					case 'storage/canceled':
+						console.log('User canceled the upload');
+						break;
+					case 'storage/unknown':
+						console.log('Unknown error occurred, inspect error.serverResponse');
+						break;
+				}
+			},
+			async () => {
+				const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+				savePost(downloadURL);
+			}
+		);
+	};
+	const savePost = async downloadURL => {
+		const coords = await getLocationCoords();
+		const userPost = {
+			createdBy: auth.currentUser.uid,
+			name,
+			location: { title: location, coords: coords },
+			comments: [],
+			likes: 0,
+			imageUri: downloadURL,
+			time: Date.now(),
+		};
+
+		try {
+			await addDoc(
+				collection(db, 'posts', auth.currentUser.uid, 'userPosts'),
+				userPost
+			);
+			setIsLoading(false);
+			navigation.navigate('PostsScreen');
+		} catch (error) {
+			console.log(error);
+			setIsLoading(false);
+			throw error;
+		}
+	};
+	const getLocationCoords = async () => {
 		if (hasLocationPermission) {
 			let loc = await Location.getCurrentPositionAsync({});
 			const coords = {
 				latitude: loc.coords.latitude,
 				longitude: loc.coords.longitude,
 			};
-			return {
-				image,
-				name,
-				location: { title: location, coords },
-				comments: [],
-				likes: 0,
-			};
+			return coords;
 		} else {
-			return {
-				image,
-				name,
-				location: { title: location, coords: 'No information' },
-				comments: [],
-				likes: 0,
-			};
+			return 'No information';
 		}
 	};
 
 	const handlePublish = async () => {
-		const post = await createPost();
-		addPost(post);
-		navigation.navigate('PostsScreen');
-		setImage(null);
-		setName('');
-		setLocation('');
+		await uploadImage();
 	};
 
 	const reset = () => {
-		setImage(null);
+		setUri(null);
 		setName('');
 		setLocation('');
 	};
@@ -115,25 +157,25 @@ const CreatePostsScreen = ({ navigation }) => {
 						<ActivityIndicator style={styles.loader} size="large" />
 					) : (
 						<Pressable
-							style={[styles.cameraBtn, image && styles.opacity]}
-							onPress={!image ? takePicture : editPicture}
+							style={[styles.cameraBtn, uri && styles.opacity]}
+							onPress={!uri ? takePicture : editPicture}
 						>
 							<MaterialIcons
 								name="camera-alt"
 								size={24}
-								color={!image ? '#BDBDBD' : '#FFFFFF'}
+								color={!uri ? '#BDBDBD' : '#FFFFFF'}
 							/>
 						</Pressable>
 					)}
 
-					{image ? (
-						<Image source={{ uri: image }} style={styles.camera} />
+					{uri ? (
+						<Image source={{ uri: uri }} style={styles.camera} />
 					) : (
 						<Camera type={type} ref={cameraRef} style={styles.camera} />
 					)}
 				</View>
 				<Text style={styles.text}>
-					{!image ? 'Завантажте фото' : 'Редагувати фото'}
+					{!uri ? 'Завантажте фото' : 'Редагувати фото'}
 				</Text>
 				<TextInput
 					placeholder="Назва"
@@ -167,25 +209,27 @@ const CreatePostsScreen = ({ navigation }) => {
 				<Button
 					text="Опубліковати"
 					onPressFunction={handlePublish}
-					disabled={!image && true}
+					disabled={!uri || (isLoading && true)}
 				/>
-				<Pressable
-					style={[
-						styles.btnDelete,
-						!image && !name && !location && styles.btnDeleteDisable,
-					]}
-					onPress={reset}
-					disabled={!image && !name && !location && true}
-				>
-					<Feather
-						name="trash-2"
-						size={24}
+				{!isLoading && (
+					<Pressable
 						style={[
-							styles.iconDeleteActive,
-							!image && !name && !location && styles.iconDeleteDisable,
+							styles.btnDelete,
+							!uri && !name && !location && styles.btnDeleteDisable,
 						]}
-					/>
-				</Pressable>
+						onPress={reset}
+						disabled={!uri && !name && !location && true}
+					>
+						<Feather
+							name="trash-2"
+							size={24}
+							style={[
+								styles.iconDeleteActive,
+								!uri && !name && !location && styles.iconDeleteDisable,
+							]}
+						/>
+					</Pressable>
+				)}
 			</View>
 		</TouchableWithoutFeedback>
 	);

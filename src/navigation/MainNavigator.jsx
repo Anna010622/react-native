@@ -22,7 +22,6 @@ const MainNavigation = () => {
 			if (user) {
 				setIsLoggedIn(true);
 				setLoaded(true);
-				// const uid = user.uid;
 			} else {
 				setIsLoggedIn(false);
 				setLoaded(true);

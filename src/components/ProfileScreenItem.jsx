@@ -1,84 +1,98 @@
 import { StyleSheet, Text, View, Image, Pressable } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import { doc, increment, updateDoc } from 'firebase/firestore';
+import { db } from '../../config';
 
-const Item = ({ item, navigation }) => (
-	<View style={styles.item}>
-		<View style={styles.imageContainer}>
-			<Image source={{ uri: item.image }} style={styles.postImg} />
-		</View>
-		{item.name && <Text style={styles.postName}>{item.name}</Text>}
-		<View style={styles.postInformationContainer}>
-			<View style={styles.containerBtn}>
-				<Pressable
-					style={styles.commentsBtn}
-					onPress={() =>
-						navigation.navigate('CommentsScreen', {
-							comments: item.comments,
-							img: item.image,
-						})
-					}
-				>
-					<Feather
-						name="message-circle"
-						size={24}
-						style={[
-							styles.commentsIcon,
-							item.comments.length === 0 && styles.inactiveColor,
-						]}
-					/>
-					<Text
-						style={[
-							styles.commentsSum,
-							item.comments.length === 0 && styles.inactiveColor,
-						]}
-					>
-						{item.comments.length}
-					</Text>
-				</Pressable>
+const Item = ({ item, navigation }) => {
+	const handleLike = async (postCreatedBy, postId) => {
+		const likesRef = doc(db, 'posts', postCreatedBy, 'userPosts', postId);
+		await updateDoc(likesRef, {
+			likes: increment(1),
+		});
+	};
 
-				<Pressable
-					style={styles.commentsBtn}
-					onPress={() => console.log('like')}
-				>
-					<Feather
-						name="thumbs-up"
-						size={24}
-						style={[
-							styles.commentsIcon,
-							item.likes === 0 && styles.inactiveColor,
-						]}
-					/>
-					<Text
-						style={[
-							styles.commentsSum,
-							item.likes === 0 && styles.inactiveColor,
-						]}
+	return (
+		<View style={styles.item}>
+			<View style={styles.imageContainer}>
+				<Image source={{ uri: item.imageUri }} style={styles.postImg} />
+			</View>
+			{item.name && <Text style={styles.postName}>{item.name}</Text>}
+			<View style={styles.postInformationContainer}>
+				<View style={styles.containerBtn}>
+					<Pressable
+						style={styles.commentsBtn}
+						onPress={() =>
+							navigation.navigate('CommentsScreen', {
+								img: item.imageUri,
+								postId: item.id,
+								postCreatedBy: item.createdBy,
+							})
+						}
 					>
-						{item.comments.length}
+						<Feather
+							name="message-circle"
+							size={24}
+							style={[
+								styles.commentsIcon,
+								item.comments.length === 0 && styles.inactiveColor,
+							]}
+						/>
+						<Text
+							style={[
+								styles.commentsSum,
+								item.comments.length === 0 && styles.inactiveColor,
+							]}
+						>
+							{item.comments.length}
+						</Text>
+					</Pressable>
+
+					<Pressable
+						style={styles.commentsBtn}
+						onPress={() => {
+							handleLike(item.createdBy, item.id);
+						}}
+					>
+						<Feather
+							name="thumbs-up"
+							size={24}
+							style={[
+								styles.commentsIcon,
+								item.likes === 0 && styles.inactiveColor,
+							]}
+						/>
+						<Text
+							style={[
+								styles.commentsSum,
+								item.likes === 0 && styles.inactiveColor,
+							]}
+						>
+							{item.likes}
+						</Text>
+					</Pressable>
+				</View>
+				<Pressable
+					style={styles.locationBtn}
+					onPress={() => {
+						if (typeof item.location.coords === 'object') {
+							navigation.navigate('MapScreen', {
+								coords: item.location.coords,
+								name: item.location.title,
+							});
+						} else {
+							alert('No information');
+						}
+					}}
+				>
+					<Feather name="map-pin" size={24} style={styles.inactiveColor} />
+					<Text numberOfLines={1} style={styles.location}>
+						{item.location.title}
 					</Text>
 				</Pressable>
 			</View>
-			<Pressable
-				style={styles.locationBtn}
-				onPress={() => {
-					if (typeof item.location.coords === 'object') {
-						navigation.navigate('MapScreen', {
-							coords: item.location.coords,
-							name: item.name,
-						});
-					} else {
-						alert('No information');
-					}
-				}}
-			>
-				<Feather name="map-pin" size={24} style={styles.inactiveColor} />
-				<Text numberOfLines={1} style={styles.location}>
-					{item.location.title}
-				</Text>
-			</Pressable>
 		</View>
-	</View>
-);
+	);
+};
 
 const styles = StyleSheet.create({
 	item: {

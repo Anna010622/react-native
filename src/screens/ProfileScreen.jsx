@@ -6,13 +6,39 @@ import {
 	FlatList,
 	Dimensions,
 } from 'react-native';
-import { useUser } from '../hooks/userContext';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import User from '../components/ProfileScreenUser';
 import Item from '../components/ProfileScreenItem';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectUserPosts } from '../redux/selectors';
+import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
+import { auth, db } from '../../config';
+import { setPosts } from '../redux/userSlice';
 
 const ProfileScreen = ({ navigation }) => {
-	const { userPosts } = useUser();
+	const userPosts = useSelector(selectUserPosts);
+	const dispatch = useDispatch();
+
+	useEffect(() => {
+		const userId = auth.currentUser.uid;
+		const q = query(
+			collection(db, 'posts', userId, 'userPosts'),
+			orderBy('time', 'desc')
+		);
+
+		const unsubscribe = onSnapshot(q, querySnapshot => {
+			const posts = [];
+			querySnapshot.forEach(doc => {
+				const data = doc.data();
+				const id = doc.id;
+				const post = { id, ...data };
+				posts.push(post);
+			});
+			dispatch(setPosts(posts));
+		});
+
+		return () => unsubscribe();
+	}, []);
 
 	const renderItem = useCallback(
 		({ item }) => <Item item={item} navigation={navigation} />,
@@ -30,7 +56,7 @@ const ProfileScreen = ({ navigation }) => {
 					showsVerticalScrollIndicator={false}
 					data={userPosts}
 					renderItem={renderItem}
-					keyExtractor={item => item.image}
+					keyExtractor={item => item.id}
 					ListHeaderComponent={<User />}
 					ListEmptyComponent={
 						<View style={styles.listEmptyComponent}>
