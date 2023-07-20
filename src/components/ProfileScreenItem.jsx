@@ -2,13 +2,23 @@ import { StyleSheet, Text, View, Image, Pressable } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { doc, increment, updateDoc } from 'firebase/firestore';
 import { db } from '../../config';
+import { useState } from 'react';
 
 const Item = ({ item, navigation }) => {
+	const [addedLike, setAddedLike] = useState(false);
 	const handleLike = async (postCreatedBy, postId) => {
 		const likesRef = doc(db, 'posts', postCreatedBy, 'userPosts', postId);
-		await updateDoc(likesRef, {
-			likes: increment(1),
-		});
+		if (!addedLike) {
+			await updateDoc(likesRef, {
+				likes: increment(1),
+			});
+			setAddedLike(true);
+		} else {
+			await updateDoc(likesRef, {
+				likes: increment(-1),
+			});
+			setAddedLike(false);
+		}
 	};
 
 	return (
@@ -56,16 +66,10 @@ const Item = ({ item, navigation }) => {
 						<Feather
 							name="thumbs-up"
 							size={24}
-							style={[
-								styles.commentsIcon,
-								item.likes === 0 && styles.inactiveColor,
-							]}
+							style={[styles.commentsIcon, !addedLike && styles.inactiveColor]}
 						/>
 						<Text
-							style={[
-								styles.commentsSum,
-								item.likes === 0 && styles.inactiveColor,
-							]}
+							style={[styles.commentsSum, !addedLike && styles.inactiveColor]}
 						>
 							{item.likes}
 						</Text>
