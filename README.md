@@ -11,8 +11,8 @@ users, view the map where the photo was taken, add comments and likesMobile
 - Firebase
 - Cloud Firestore
 
-![registration screen](https://res.cloudinary.com/dwpatwhkh/image/upload/v1697482212/react%20native%20app/%D0%97%D0%BD%D1%96%D0%BC%D0%BE%D0%BA_%D0%B5%D0%BA%D1%80%D0%B0%D0%BD%D0%B0_2023-10-16_213934_awyztw.png)
+![registration screen](https://res.cloudinary.com/dwpatwhkh/image/upload/v1697483145/react%20native%20app/1.png)
 
-![post screen](https://res.cloudinary.com/dwpatwhkh/image/upload/v1697482212/react%20native%20app/%D0%97%D0%BD%D1%96%D0%BC%D0%BE%D0%BA_%D0%B5%D0%BA%D1%80%D0%B0%D0%BD%D0%B0_2023-10-16_213858_dsonwh.png)
+![post screen](https://res.cloudinary.com/dwpatwhkh/image/upload/v1697483145/react%20native%20app/2.png)
 
-![comments screen](https://res.cloudinary.com/dwpatwhkh/image/upload/v1697482213/react%20native%20app/%D0%97%D0%BD%D1%96%D0%BC%D0%BE%D0%BA_%D0%B5%D0%BA%D1%80%D0%B0%D0%BD%D0%B0_2023-10-16_212952_vjjsx0.png)
+![comments screen](https://res.cloudinary.com/dwpatwhkh/image/upload/v1697483149/react%20native%20app/3.png)
