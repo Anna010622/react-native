@@ -69,8 +69,13 @@ const MainNavigation = () => {
 										name="CommentsScreen"
 										component={CommentsScreen}
 										screenOptions={{ headerShown: true }}
+										options={{ title: 'Коментарі' }}
 									/>
-									<MainStack.Screen name="MapScreen" component={MapScreen} />
+									<MainStack.Screen
+										name="MapScreen"
+										component={MapScreen}
+										options={{ title: 'Де було зроблено фото' }}
+									/>
 								</MainStack.Group>
 							</>
 						)}
